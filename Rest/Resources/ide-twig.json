@@ -1,0 +1,8 @@
+{
+  "namespaces": [
+    {
+      "namespace": "Rest",
+      "path": "views"
+    }
+  ]
+}
