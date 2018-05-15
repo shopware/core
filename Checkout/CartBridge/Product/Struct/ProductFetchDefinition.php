@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 /**
  * Shopware 5
  * Copyright (c) shopware AG
@@ -22,28 +23,30 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\Checkout;
+namespace Shopware\Checkout\CartBridge\Product\Struct;
 
-use Symfony\Component\Config\FileLocator;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
-use Symfony\Component\HttpKernel\Bundle\Bundle;
+use Shopware\Framework\Struct\Struct;
 
-class Checkout extends Bundle
+class ProductFetchDefinition extends Struct
 {
     /**
-     * {@inheritdoc}
+     * @var string[]
      */
-    public function build(ContainerBuilder $container)
-    {
-        parent::build($container);
+    protected $ids;
 
-        $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/DependencyInjection/'));
-        $loader->load('customer.xml');
-        $loader->load('order.xml');
-        $loader->load('payment.xml');
-        $loader->load('shipping.xml');
-        $loader->load('cart.xml');
-        $loader->load('cart_bridge.xml');
+    /**
+     * @param string[] $ids
+     */
+    public function __construct(array $ids)
+    {
+        $this->ids = $ids;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getIds(): array
+    {
+        return $this->ids;
     }
 }

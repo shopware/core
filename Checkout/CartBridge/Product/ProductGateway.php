@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 /**
  * Shopware 5
  * Copyright (c) shopware AG
@@ -22,28 +23,26 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\Checkout;
+namespace Shopware\Checkout\CartBridge\Product;
 
-use Symfony\Component\Config\FileLocator;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
-use Symfony\Component\HttpKernel\Bundle\Bundle;
+use Shopware\Content\Product\Collection\ProductBasicCollection;
+use Shopware\Content\Product\Repository\ProductRepository;
+use Shopware\Context\Struct\StorefrontContext;
 
-class Checkout extends Bundle
+class ProductGateway implements ProductGatewayInterface
 {
     /**
-     * {@inheritdoc}
+     * @var ProductRepository
      */
-    public function build(ContainerBuilder $container)
-    {
-        parent::build($container);
+    private $repository;
 
-        $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/DependencyInjection/'));
-        $loader->load('customer.xml');
-        $loader->load('order.xml');
-        $loader->load('payment.xml');
-        $loader->load('shipping.xml');
-        $loader->load('cart.xml');
-        $loader->load('cart_bridge.xml');
+    public function __construct(ProductRepository $repository)
+    {
+        $this->repository = $repository;
+    }
+
+    public function get(array $ids, StorefrontContext $context): ProductBasicCollection
+    {
+        return $this->repository->readBasic($ids, $context->getApplicationContext());
     }
 }

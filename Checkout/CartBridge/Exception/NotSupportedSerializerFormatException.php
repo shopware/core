@@ -22,28 +22,39 @@
  * our trademarks remain entirely with us.
  */
 
-namespace Shopware\Checkout;
+namespace Shopware\Checkout\CartBridge\Exception;
 
-use Symfony\Component\Config\FileLocator;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
-use Symfony\Component\HttpKernel\Bundle\Bundle;
-
-class Checkout extends Bundle
+class NotSupportedSerializerFormatException extends \Exception
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function build(ContainerBuilder $container)
-    {
-        parent::build($container);
+    public const CODE = 4006;
 
-        $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/DependencyInjection/'));
-        $loader->load('customer.xml');
-        $loader->load('order.xml');
-        $loader->load('payment.xml');
-        $loader->load('shipping.xml');
-        $loader->load('cart.xml');
-        $loader->load('cart_bridge.xml');
+    /**
+     * @var mixed
+     */
+    protected $data;
+
+    /**
+     * @var string
+     */
+    protected $format;
+
+    public function __construct($data, string $format)
+    {
+        parent::__construct(
+            sprintf('Not supported serializer format %s', $format),
+            self::CODE
+        );
+        $this->data = $data;
+        $this->format = $format;
+    }
+
+    public function getData()
+    {
+        return $this->data;
+    }
+
+    public function getFormat(): string
+    {
+        return $this->format;
     }
 }
