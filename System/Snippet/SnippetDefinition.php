@@ -16,9 +16,6 @@ use Shopware\Core\Framework\ORM\FieldCollection;
 use Shopware\Core\Framework\ORM\Write\Flag\PrimaryKey;
 use Shopware\Core\Framework\ORM\Write\Flag\Required;
 use Shopware\Core\System\Snippet\Collection\SnippetBasicCollection;
-use Shopware\Core\System\Snippet\Collection\SnippetDetailCollection;
-use Shopware\Core\System\Snippet\Event\SnippetDeletedEvent;
-use Shopware\Core\System\Snippet\Event\SnippetWrittenEvent;
 use Shopware\Core\System\Snippet\Struct\SnippetBasicStruct;
 use Shopware\Core\System\Snippet\Struct\SnippetDetailStruct;
 
@@ -44,13 +41,9 @@ class SnippetDefinition extends EntityDefinition
         return 'snippet';
     }
 
-    public static function getFields(): FieldCollection
+    public static function defineFields(): FieldCollection
     {
-        if (self::$fields) {
-            return self::$fields;
-        }
-
-        self::$fields = new FieldCollection([
+        return new FieldCollection([
             new TenantIdField(),
             (new IdField('id', 'id'))->setFlags(new PrimaryKey(), new Required()),
             (new FkField('language_id', 'languageId', LanguageDefinition::class))->setFlags(new PrimaryKey(), new Required()),
@@ -60,17 +53,6 @@ class SnippetDefinition extends EntityDefinition
             new DateField('updated_at', 'updatedAt'),
             new ManyToOneAssociationField('language', 'languageId', LanguageDefinition::class, true),
         ]);
-
-        foreach (self::$extensions as $extension) {
-            $extension->extendFields(self::$fields);
-        }
-
-        return self::$fields;
-    }
-
-    public static function getRepositoryClass(): string
-    {
-        return SnippetRepository::class;
     }
 
     public static function getBasicCollectionClass(): string
@@ -78,33 +60,8 @@ class SnippetDefinition extends EntityDefinition
         return SnippetBasicCollection::class;
     }
 
-    public static function getDeletedEventClass(): string
-    {
-        return SnippetDeletedEvent::class;
-    }
-
-    public static function getWrittenEventClass(): string
-    {
-        return SnippetWrittenEvent::class;
-    }
-
     public static function getBasicStructClass(): string
     {
         return SnippetBasicStruct::class;
-    }
-
-    public static function getTranslationDefinitionClass(): ?string
-    {
-        return null;
-    }
-
-    public static function getDetailStructClass(): string
-    {
-        return SnippetDetailStruct::class;
-    }
-
-    public static function getDetailCollectionClass(): string
-    {
-        return SnippetDetailCollection::class;
     }
 }
