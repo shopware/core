@@ -9,7 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class AuthController extends Controller
+class StorefrontAuthController extends Controller
 {
     /**
      * @var AuthorizationServer
@@ -22,14 +22,14 @@ class AuthController extends Controller
     }
 
     /**
-     * @Route("/api/oauth/authorize", name="api.oauth.authorize")
+     * @Route("/storefront-api/oauth/authorize", name="storefront_api.oauth.authorize")
      */
     public function authorize(Request $request)
     {
     }
 
     /**
-     * @Route("/api/oauth/token", name="api.oauth.token")
+     * @Route("/storefront-api/oauth/token", name="storefront_api.oauth.token")
      */
     public function token(Request $request)
     {
