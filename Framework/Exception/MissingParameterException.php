@@ -6,13 +6,13 @@ use Shopware\Core\Framework\ShopwareHttpException;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
-class InvalidUuidException extends ShopwareHttpException
+class MissingParameterException extends ShopwareHttpException
 {
-    protected $code = 'INVALID-UUID';
+    protected $code = 'MISSING-PARAMETER';
 
-    public function __construct(string $uuid, $code = 0, Throwable $previous = null)
+    public function __construct(string $name, $code = 0, Throwable $previous = null)
     {
-        $message = sprintf('Value is not a valid UUID: %s', $uuid);
+        $message = sprintf('Parameter `%s` is missing', $name);
 
         parent::__construct($message, $code, $previous);
     }

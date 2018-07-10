@@ -9,7 +9,7 @@ use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\ORM\RepositoryInterface;
 use Shopware\Core\Framework\Test\Api\ApiTestCase;
 
-class CheckoutContextControllerTest extends ApiTestCase
+class StorefrontCheckoutContextControllerTest extends ApiTestCase
 {
     /**
      * @var RepositoryInterface
@@ -85,7 +85,7 @@ class CheckoutContextControllerTest extends ApiTestCase
         $content = json_decode($this->storefrontApiClient->getResponse()->getContent(), true);
 
         $this->assertEquals(
-            'Customer is not logged in.',
+            'Customer is not logged in',
             $content['errors'][0]['detail'] ?? null
         );
 
@@ -97,7 +97,7 @@ class CheckoutContextControllerTest extends ApiTestCase
         $content = json_decode($this->storefrontApiClient->getResponse()->getContent(), true);
 
         $this->assertEquals(
-            'Customer is not logged in.',
+            'Customer is not logged in',
             $content['errors'][0]['detail'] ?? null
         );
     }

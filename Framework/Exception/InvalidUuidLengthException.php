@@ -6,13 +6,13 @@ use Shopware\Core\Framework\ShopwareHttpException;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
-class InvalidUuidException extends ShopwareHttpException
+class InvalidUuidLengthException extends ShopwareHttpException
 {
-    protected $code = 'INVALID-UUID';
+    protected $code = 'UUID-INVALID-LENGTH';
 
-    public function __construct(string $uuid, $code = 0, Throwable $previous = null)
+    public function __construct(int $length, string $hex, $code = 0, Throwable $previous = null)
     {
-        $message = sprintf('Value is not a valid UUID: %s', $uuid);
+        $message = sprintf('UUID has a invalid length. 16 bytes expected, %s given. Hexadecimal reprensentation: %s', $length, $hex);
 
         parent::__construct($message, $code, $previous);
     }
