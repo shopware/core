@@ -4,10 +4,15 @@ namespace Shopware\Core\Framework\Store\Struct;
 
 use Shopware\Core\Framework\Struct\Struct;
 
-class StoreLicenseTypeStruct extends Struct
+class PluginDownloadDataStruct extends Struct
 {
     /**
      * @var string
      */
-    protected $name;
+    protected $location;
+
+    public function getLocation(): string
+    {
+        return $this->location;
+    }
 }
