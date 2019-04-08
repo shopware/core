@@ -1,16 +1,16 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Content\Configuration\Aggregate\ConfigurationGroupOption;
+namespace Shopware\Core\Content\Property\Aggregate\PropertyGroupOption;
 
-use Shopware\Core\Content\Configuration\Aggregate\ConfigurationGroupOptionTranslation\ConfigurationGroupOptionTranslationCollection;
-use Shopware\Core\Content\Configuration\ConfigurationGroupEntity;
 use Shopware\Core\Content\Media\MediaEntity;
 use Shopware\Core\Content\Product\Aggregate\ProductConfiguratorSetting\ProductConfiguratorSettingCollection;
 use Shopware\Core\Content\Product\ProductCollection;
+use Shopware\Core\Content\Property\Aggregate\PropertyGroupOptionTranslation\PropertyGroupOptionTranslationCollection;
+use Shopware\Core\Content\Property\PropertyGroupEntity;
 use Shopware\Core\Framework\DataAbstractionLayer\Entity;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityIdTrait;
 
-class ConfigurationGroupOptionEntity extends Entity
+class PropertyGroupOptionEntity extends Entity
 {
     use EntityIdTrait;
 
@@ -40,12 +40,12 @@ class ConfigurationGroupOptionEntity extends Entity
     protected $mediaId;
 
     /**
-     * @var ConfigurationGroupEntity|null
+     * @var PropertyGroupEntity|null
      */
     protected $group;
 
     /**
-     * @var ConfigurationGroupOptionTranslationCollection|null
+     * @var PropertyGroupOptionTranslationCollection|null
      */
     protected $translations;
 
@@ -144,22 +144,22 @@ class ConfigurationGroupOptionEntity extends Entity
         $this->mediaId = $mediaId;
     }
 
-    public function getGroup(): ?ConfigurationGroupEntity
+    public function getGroup(): ?PropertyGroupEntity
     {
         return $this->group;
     }
 
-    public function setGroup(ConfigurationGroupEntity $group): void
+    public function setGroup(PropertyGroupEntity $group): void
     {
         $this->group = $group;
     }
 
-    public function getTranslations(): ?ConfigurationGroupOptionTranslationCollection
+    public function getTranslations(): ?PropertyGroupOptionTranslationCollection
     {
         return $this->translations;
     }
 
-    public function setTranslations(ConfigurationGroupOptionTranslationCollection $translations): void
+    public function setTranslations(PropertyGroupOptionTranslationCollection $translations): void
     {
         $this->translations = $translations;
     }

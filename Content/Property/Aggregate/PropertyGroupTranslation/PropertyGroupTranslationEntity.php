@@ -1,16 +1,16 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Content\Configuration\Aggregate\ConfigurationGroupTranslation;
+namespace Shopware\Core\Content\Property\Aggregate\PropertyGroupTranslation;
 
-use Shopware\Core\Content\Configuration\ConfigurationGroupEntity;
+use Shopware\Core\Content\Property\PropertyGroupEntity;
 use Shopware\Core\Framework\DataAbstractionLayer\TranslationEntity;
 
-class ConfigurationGroupTranslationEntity extends TranslationEntity
+class PropertyGroupTranslationEntity extends TranslationEntity
 {
     /**
      * @var string
      */
-    protected $configurationGroupId;
+    protected $propertyGroupId;
 
     /**
      * @var string|null
@@ -23,23 +23,23 @@ class ConfigurationGroupTranslationEntity extends TranslationEntity
     protected $description;
 
     /**
-     * @var ConfigurationGroupEntity|null
+     * @var PropertyGroupEntity|null
      */
-    protected $configurationGroup;
+    protected $propertyGroup;
 
     /**
      * @var array|null
      */
     protected $attributes;
 
-    public function getConfigurationGroupId(): string
+    public function getPropertyGroupId(): string
     {
-        return $this->configurationGroupId;
+        return $this->propertyGroupId;
     }
 
-    public function setConfigurationGroupId(string $configurationGroupId): void
+    public function setPropertyGroupId(string $propertyGroupId): void
     {
-        $this->configurationGroupId = $configurationGroupId;
+        $this->propertyGroupId = $propertyGroupId;
     }
 
     public function getName(): ?string
@@ -52,14 +52,14 @@ class ConfigurationGroupTranslationEntity extends TranslationEntity
         $this->name = $name;
     }
 
-    public function getConfigurationGroup(): ?ConfigurationGroupEntity
+    public function getPropertyGroup(): ?PropertyGroupEntity
     {
-        return $this->configurationGroup;
+        return $this->propertyGroup;
     }
 
-    public function setConfigurationGroup(ConfigurationGroupEntity $configurationGroup): void
+    public function setPropertyGroup(PropertyGroupEntity $propertyGroup): void
     {
-        $this->configurationGroup = $configurationGroup;
+        $this->propertyGroup = $propertyGroup;
     }
 
     public function getDescription(): ?string

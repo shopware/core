@@ -1,13 +1,13 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Content\Configuration;
+namespace Shopware\Core\Content\Property;
 
-use Shopware\Core\Content\Configuration\Aggregate\ConfigurationGroupOption\ConfigurationGroupOptionCollection;
-use Shopware\Core\Content\Configuration\Aggregate\ConfigurationGroupTranslation\ConfigurationGroupTranslationCollection;
+use Shopware\Core\Content\Property\Aggregate\PropertyGroupOption\PropertyGroupOptionCollection;
+use Shopware\Core\Content\Property\Aggregate\PropertyGroupTranslation\PropertyGroupTranslationCollection;
 use Shopware\Core\Framework\DataAbstractionLayer\Entity;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityIdTrait;
 
-class ConfigurationGroupEntity extends Entity
+class PropertyGroupEntity extends Entity
 {
     use EntityIdTrait;
 
@@ -32,12 +32,12 @@ class ConfigurationGroupEntity extends Entity
     protected $description;
 
     /**
-     * @var ConfigurationGroupOptionCollection|null
+     * @var PropertyGroupOptionCollection|null
      */
     protected $options;
 
     /**
-     * @var ConfigurationGroupTranslationCollection|null
+     * @var PropertyGroupTranslationCollection|null
      */
     protected $translations;
 
@@ -86,22 +86,22 @@ class ConfigurationGroupEntity extends Entity
         $this->name = $name;
     }
 
-    public function getOptions(): ?ConfigurationGroupOptionCollection
+    public function getOptions(): ?PropertyGroupOptionCollection
     {
         return $this->options;
     }
 
-    public function setOptions(ConfigurationGroupOptionCollection $options): void
+    public function setOptions(PropertyGroupOptionCollection $options): void
     {
         $this->options = $options;
     }
 
-    public function getTranslations(): ?ConfigurationGroupTranslationCollection
+    public function getTranslations(): ?PropertyGroupTranslationCollection
     {
         return $this->translations;
     }
 
-    public function setTranslations(ConfigurationGroupTranslationCollection $translations): void
+    public function setTranslations(PropertyGroupTranslationCollection $translations): void
     {
         $this->translations = $translations;
     }

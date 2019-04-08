@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Content\Configuration;
+namespace Shopware\Core\Content\Property;
 
-use Shopware\Core\Content\Configuration\Aggregate\ConfigurationGroupOption\ConfigurationGroupOptionDefinition;
-use Shopware\Core\Content\Configuration\Aggregate\ConfigurationGroupTranslation\ConfigurationGroupTranslationDefinition;
+use Shopware\Core\Content\Property\Aggregate\PropertyGroupOption\PropertyGroupOptionDefinition;
+use Shopware\Core\Content\Property\Aggregate\PropertyGroupTranslation\PropertyGroupTranslationDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\CreatedAtField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\CascadeDelete;
@@ -19,7 +19,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Field\UpdatedAtField;
 use Shopware\Core\Framework\DataAbstractionLayer\FieldCollection;
 use Shopware\Core\Framework\DataAbstractionLayer\Write\EntityExistence;
 
-class ConfigurationGroupDefinition extends EntityDefinition
+class PropertyGroupDefinition extends EntityDefinition
 {
     public const DISPLAY_TYPE_TEXT = 'text';
     public const DISPLAY_TYPE_IMAGE = 'image';
@@ -31,17 +31,17 @@ class ConfigurationGroupDefinition extends EntityDefinition
 
     public static function getEntityName(): string
     {
-        return 'configuration_group';
+        return 'property_group';
     }
 
     public static function getCollectionClass(): string
     {
-        return ConfigurationGroupCollection::class;
+        return PropertyGroupCollection::class;
     }
 
     public static function getEntityClass(): string
     {
-        return ConfigurationGroupEntity::class;
+        return PropertyGroupEntity::class;
     }
 
     public static function getDefaults(EntityExistence $existence): array
@@ -65,8 +65,8 @@ class ConfigurationGroupDefinition extends EntityDefinition
             new TranslatedField('attributes'),
             new CreatedAtField(),
             new UpdatedAtField(),
-            (new OneToManyAssociationField('options', ConfigurationGroupOptionDefinition::class, 'configuration_group_id', 'id'))->addFlags(new CascadeDelete(), new SearchRanking(SearchRanking::ASSOCIATION_SEARCH_RANKING)),
-            (new TranslationsAssociationField(ConfigurationGroupTranslationDefinition::class, 'configuration_group_id'))->addFlags(new Required(), new CascadeDelete()),
+            (new OneToManyAssociationField('options', PropertyGroupOptionDefinition::class, 'property_group_id', 'id'))->addFlags(new CascadeDelete(), new SearchRanking(SearchRanking::ASSOCIATION_SEARCH_RANKING)),
+            (new TranslationsAssociationField(PropertyGroupTranslationDefinition::class, 'property_group_id'))->addFlags(new Required(), new CascadeDelete()),
         ]);
     }
 }

@@ -5,7 +5,7 @@ namespace Shopware\Core\Migration;
 use Doctrine\DBAL\Connection;
 use Shopware\Core\Framework\Migration\MigrationStep;
 
-class Migration1553521641CleanUpConfigurationGroup extends MigrationStep
+class Migration1553521641CleanUpPropertyGroup extends MigrationStep
 {
     public function getCreationTimestamp(): int
     {
@@ -19,7 +19,7 @@ class Migration1553521641CleanUpConfigurationGroup extends MigrationStep
     public function updateDestructive(Connection $connection): void
     {
         $connection->exec(
-            'ALTER TABLE `configuration_group`
+            'ALTER TABLE `property_group`
             DROP COLUMN `filterable`,
             DROP COLUMN `comparable`,
             DROP COLUMN `position`

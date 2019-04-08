@@ -1,14 +1,14 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Content\Configuration\Aggregate\ConfigurationGroupOption;
+namespace Shopware\Core\Content\Property\Aggregate\PropertyGroupOption;
 
-use Shopware\Core\Content\Configuration\Aggregate\ConfigurationGroupOptionTranslation\ConfigurationGroupOptionTranslationDefinition;
-use Shopware\Core\Content\Configuration\ConfigurationGroupDefinition;
 use Shopware\Core\Content\Media\MediaDefinition;
 use Shopware\Core\Content\Product\Aggregate\ProductConfiguratorSetting\ProductConfiguratorSettingDefinition;
 use Shopware\Core\Content\Product\Aggregate\ProductOption\ProductOptionDefinition;
 use Shopware\Core\Content\Product\Aggregate\ProductProperty\ProductPropertyDefinition;
 use Shopware\Core\Content\Product\ProductDefinition;
+use Shopware\Core\Content\Property\Aggregate\PropertyGroupOptionTranslation\PropertyGroupOptionTranslationDefinition;
+use Shopware\Core\Content\Property\PropertyGroupDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\CreatedAtField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\FkField;
@@ -27,38 +27,38 @@ use Shopware\Core\Framework\DataAbstractionLayer\Field\TranslationsAssociationFi
 use Shopware\Core\Framework\DataAbstractionLayer\Field\UpdatedAtField;
 use Shopware\Core\Framework\DataAbstractionLayer\FieldCollection;
 
-class ConfigurationGroupOptionDefinition extends EntityDefinition
+class PropertyGroupOptionDefinition extends EntityDefinition
 {
     public static function getEntityName(): string
     {
-        return 'configuration_group_option';
+        return 'property_group_option';
     }
 
     public static function getCollectionClass(): string
     {
-        return ConfigurationGroupOptionCollection::class;
+        return PropertyGroupOptionCollection::class;
     }
 
     public static function getEntityClass(): string
     {
-        return ConfigurationGroupOptionEntity::class;
+        return PropertyGroupOptionEntity::class;
     }
 
     public static function getTranslationDefinitionClass(): ?string
     {
-        return ConfigurationGroupOptionTranslationDefinition::class;
+        return PropertyGroupOptionTranslationDefinition::class;
     }
 
     public static function getParentDefinitionClass(): ?string
     {
-        return ConfigurationGroupDefinition::class;
+        return PropertyGroupDefinition::class;
     }
 
     protected static function defineFields(): FieldCollection
     {
         return new FieldCollection([
             (new IdField('id', 'id'))->addFlags(new PrimaryKey(), new Required()),
-            (new FkField('configuration_group_id', 'groupId', ConfigurationGroupDefinition::class))->addFlags(new Required()),
+            (new FkField('property_group_id', 'groupId', PropertyGroupDefinition::class))->addFlags(new Required()),
             (new TranslatedField('name'))->addFlags(new SearchRanking(SearchRanking::HIGH_SEARCH_RANKING)),
             new TranslatedField('position'),
             new StringField('color_hex_code', 'colorHexCode'),
@@ -67,11 +67,11 @@ class ConfigurationGroupOptionDefinition extends EntityDefinition
             new CreatedAtField(),
             new UpdatedAtField(),
             new ManyToOneAssociationField('media', 'media_id', MediaDefinition::class, 'id', true),
-            new ManyToOneAssociationField('group', 'configuration_group_id', ConfigurationGroupDefinition::class, 'id', false),
-            (new TranslationsAssociationField(ConfigurationGroupOptionTranslationDefinition::class, 'configuration_group_option_id'))->addFlags(new Required()),
-            (new OneToManyAssociationField('productConfigurators', ProductConfiguratorSettingDefinition::class, 'configuration_group_option_id', 'id'))->addFlags(new CascadeDelete()),
-            (new ManyToManyAssociationField('productProperties', ProductDefinition::class, ProductPropertyDefinition::class, 'configuration_group_option_id', 'product_id'))->addFlags(new CascadeDelete(), new ReverseInherited('properties')),
-            (new ManyToManyAssociationField('productOptions', ProductDefinition::class, ProductOptionDefinition::class, 'configuration_group_option_id', 'product_id'))->addFlags(new CascadeDelete()),
+            new ManyToOneAssociationField('group', 'property_group_id', PropertyGroupDefinition::class, 'id', false),
+            (new TranslationsAssociationField(PropertyGroupOptionTranslationDefinition::class, 'property_group_option_id'))->addFlags(new Required()),
+            (new OneToManyAssociationField('productConfigurators', ProductConfiguratorSettingDefinition::class, 'property_group_option_id', 'id'))->addFlags(new CascadeDelete()),
+            (new ManyToManyAssociationField('productProperties', ProductDefinition::class, ProductPropertyDefinition::class, 'property_group_option_id', 'product_id'))->addFlags(new CascadeDelete(), new ReverseInherited('properties')),
+            (new ManyToManyAssociationField('productOptions', ProductDefinition::class, ProductOptionDefinition::class, 'property_group_option_id', 'product_id'))->addFlags(new CascadeDelete()),
         ]);
     }
 }
