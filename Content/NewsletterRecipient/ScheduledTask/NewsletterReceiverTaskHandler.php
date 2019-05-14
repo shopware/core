@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Content\NewsletterReceiver\ScheduledTask;
+namespace Shopware\Core\Content\NewsletterRecipient\ScheduledTask;
 
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
@@ -9,42 +9,42 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\RangeFilter;
 use Shopware\Core\Framework\ScheduledTask\ScheduledTaskHandler;
 
-class NewsletterReceiverTaskHandler extends ScheduledTaskHandler
+class NewsletterRecipientTaskHandler extends ScheduledTaskHandler
 {
     /**
      * @var EntityRepositoryInterface
      */
-    private $newsletterReceiverRepository;
+    private $newsletterRecipientRepository;
 
-    public function __construct(EntityRepositoryInterface $scheduledTaskRepository, EntityRepositoryInterface $newsletterReceiverRepository)
+    public function __construct(EntityRepositoryInterface $scheduledTaskRepository, EntityRepositoryInterface $newsletterRecipientRepository)
     {
         parent::__construct($scheduledTaskRepository);
 
-        $this->newsletterReceiverRepository = $newsletterReceiverRepository;
+        $this->newsletterRecipientRepository = $newsletterRecipientRepository;
     }
 
     public static function getHandledMessages(): iterable
     {
         return [
-            NewsletterReceiverTask::class,
+            NewsletterRecipientTask::class,
         ];
     }
 
     public function run(): void
     {
-        $criteria = $this->getExpiredNewsletterReceiverCriteria();
-        $emailReceiver = $this->newsletterReceiverRepository->searchIds($criteria, Context::createDefaultContext());
+        $criteria = $this->getExpiredNewsletterRecipientCriteria();
+        $emailRecipient = $this->newsletterRecipientRepository->searchIds($criteria, Context::createDefaultContext());
 
-        if (empty($emailReceiver->getIds())) {
+        if (empty($emailRecipient->getIds())) {
             return;
         }
 
-        $emailReceiverIds = array_map(function ($id) {return ['id' => $id]; }, $emailReceiver->getIds());
+        $emailRecipientIds = array_map(function ($id) {return ['id' => $id]; }, $emailRecipient->getIds());
 
-        $this->newsletterReceiverRepository->delete($emailReceiverIds, Context::createDefaultContext());
+        $this->newsletterRecipientRepository->delete($emailRecipientIds, Context::createDefaultContext());
     }
 
-    private function getExpiredNewsletterReceiverCriteria(): Criteria
+    private function getExpiredNewsletterRecipientCriteria(): Criteria
     {
         $criteria = new Criteria();
 

@@ -5,7 +5,7 @@ namespace Shopware\Core\Migration;
 use Doctrine\DBAL\Connection;
 use Shopware\Core\Framework\Migration\MigrationStep;
 
-class Migration1536233430NewsletterReceiver extends MigrationStep
+class Migration1536233430NewsletterRecipient extends MigrationStep
 {
     public function getCreationTimestamp(): int
     {
@@ -15,7 +15,7 @@ class Migration1536233430NewsletterReceiver extends MigrationStep
     public function update(Connection $connection): void
     {
         $connection->executeQuery('
-            CREATE TABLE `newsletter_receiver` (
+            CREATE TABLE `newsletter_recipient` (
               `id` BINARY(16) NOT NULL,
               `email` VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL,
               `title` VARCHAR(255) COLLATE utf8mb4_unicode_ci NULL,
@@ -34,12 +34,12 @@ class Migration1536233430NewsletterReceiver extends MigrationStep
               `created_at` DATETIME(3) NOT NULL,
               `updated_at` DATETIME(3) NULL,
               PRIMARY KEY (`id`),
-              CONSTRAINT `json.newsletter_receiver.custom_fields` CHECK (JSON_VALID(`custom_fields`)),
-              CONSTRAINT `fk.newsletter_receiver.salutation_id` FOREIGN KEY (`salutation_id`)
+              CONSTRAINT `json.newsletter_recipient.custom_fields` CHECK (JSON_VALID(`custom_fields`)),
+              CONSTRAINT `fk.newsletter_recipient.salutation_id` FOREIGN KEY (`salutation_id`)
                 REFERENCES `salutation` (`id`) ON DELETE RESTRICT,
-              CONSTRAINT `fk.newsletter_receiver.language_id` FOREIGN KEY (`language_id`)
+              CONSTRAINT `fk.newsletter_recipient.language_id` FOREIGN KEY (`language_id`)
                 REFERENCES `language` (`id`) ON DELETE RESTRICT,
-              CONSTRAINT `fk.newsletter_receiver.sales_channel_id` FOREIGN KEY (`sales_channel_id`)
+              CONSTRAINT `fk.newsletter_recipient.sales_channel_id` FOREIGN KEY (`sales_channel_id`)
                 REFERENCES `sales_channel` (`id`) ON DELETE RESTRICT
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ');

@@ -1,46 +1,46 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Content\NewsletterReceiver;
+namespace Shopware\Core\Content\NewsletterRecipient;
 
-class NewsletterReceiverEvents
+class NewsletterRecipientEvents
 {
     /**
-     * @Event("Shopware\Core\Content\NewsletterReceiver\Event\NewsletterConfirmEvent")
+     * @Event("Shopware\Core\Content\NewsletterRecipient\Event\NewsletterConfirmEvent")
      */
     public const NEWSLETTER_CONFIRM_EVENT = 'newsletter.confirm';
 
     /**
      * @Event("Shopware\Core\Framework\DataAbstractionLayer\Event\EntityWrittenEvent")
      */
-    public const NEWSLETTER_RECEIVER_WRITTEN_EVENT = 'newsletter_receiver.written';
+    public const NEWSLETTER_RECIPIENT_WRITTEN_EVENT = 'newsletter_recipient.written';
 
     /**
      * @Event("Shopware\Core\Framework\DataAbstractionLayer\Event\EntityDeletedEvent")
      */
-    public const NEWSLETTER_RECEIVER_DELETED_EVENT = 'newsletter_receiver.deleted';
+    public const NEWSLETTER_RECIPIENT_DELETED_EVENT = 'newsletter_recipient.deleted';
 
     /**
      * @Event("Shopware\Core\Framework\DataAbstractionLayer\Event\EntityLoadedEvent")
      */
-    public const NEWSLETTER_RECEIVER_LOADED_EVENT = 'newsletter_receiver.loaded';
+    public const NEWSLETTER_RECIPIENT_LOADED_EVENT = 'newsletter_recipient.loaded';
 
     /**
      * @Event("Shopware\Core\Framework\DataAbstractionLayer\Event\EntitySearchResultLoadedEvent")
      */
-    public const NEWSLETTER_RECEIVER_SEARCH_RESULT_LOADED_EVENT = 'newsletter_receiver.search.result.loaded';
+    public const NEWSLETTER_RECIPIENT_SEARCH_RESULT_LOADED_EVENT = 'newsletter_recipient.search.result.loaded';
 
     /**
      * @Event("Shopware\Core\Framework\DataAbstractionLayer\Event\EntityAggregationResultLoadedEvent")
      */
-    public const NEWSLETTER_RECEIVER_AGGREGATION_LOADED_EVENT = 'newsletter_receiver.aggregation.result.loaded';
+    public const NEWSLETTER_RECIPIENT_AGGREGATION_LOADED_EVENT = 'newsletter_recipient.aggregation.result.loaded';
 
     /**
      * @Event("Shopware\Core\Framework\DataAbstractionLayer\Event\EntityIdSearchResultLoadedEvent")
      */
-    public const NEWSLETTER_RECEIVER_ID_SEARCH_RESULT_LOADED_EVENT = 'newsletter_receiver.id.search.result.loaded';
+    public const NEWSLETTER_RECIPIENT_ID_SEARCH_RESULT_LOADED_EVENT = 'newsletter_recipient.id.search.result.loaded';
 
     /**
-     * @Event("Shopware\Core\Content\NewsletterReceiver\Event\NewsletterRegisterEvent")
+     * @Event("Shopware\Core\Content\NewsletterRecipient\Event\NewsletterRegisterEvent")
      */
     public const NEWSLETTER_REGISTER_EVENT = 'newsletter.register';
 }

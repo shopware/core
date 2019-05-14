@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Content\NewsletterReceiver;
+namespace Shopware\Core\Content\NewsletterRecipient;
 
-use Shopware\Core\Content\NewsletterReceiver\Aggregate\NewsletterReceiverTag\NewsletterReceiverTagDefinition;
+use Shopware\Core\Content\NewsletterRecipient\Aggregate\NewsletterRecipientTag\NewsletterRecipientTagDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\CustomFields;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\DateField;
@@ -19,21 +19,21 @@ use Shopware\Core\System\SalesChannel\SalesChannelDefinition;
 use Shopware\Core\System\Salutation\SalutationDefinition;
 use Shopware\Core\System\Tag\TagDefinition;
 
-class NewsletterReceiverDefinition extends EntityDefinition
+class NewsletterRecipientDefinition extends EntityDefinition
 {
     public function getEntityName(): string
     {
-        return 'newsletter_receiver';
+        return 'newsletter_recipient';
     }
 
     public function getCollectionClass(): string
     {
-        return NewsletterReceiverCollection::class;
+        return NewsletterRecipientCollection::class;
     }
 
     public function getEntityClass(): string
     {
-        return NewsletterReceiverEntity::class;
+        return NewsletterRecipientEntity::class;
     }
 
     protected function defineFields(): FieldCollection
@@ -53,7 +53,7 @@ class NewsletterReceiverDefinition extends EntityDefinition
 
             new DateField('confirmed_at', 'confirmedAt'),
 
-            new ManyToManyAssociationField('tags', TagDefinition::class, NewsletterReceiverTagDefinition::class, 'newsletter_receiver_id', 'tag_id'),
+            new ManyToManyAssociationField('tags', TagDefinition::class, NewsletterRecipientTagDefinition::class, 'newsletter_recipient_id', 'tag_id'),
 
             new FkField('salutation_id', 'salutationId', SalutationDefinition::class),
             new ManyToOneAssociationField('salutation', 'salutation_id', SalutationDefinition::class, 'id', true),

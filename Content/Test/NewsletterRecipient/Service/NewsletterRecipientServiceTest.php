@@ -1,13 +1,13 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Content\Test\NewsletterReceiver\Service;
+namespace Shopware\Core\Content\Test\NewsletterRecipient\Service;
 
 use Doctrine\DBAL\Connection;
 use PHPUnit\Framework\TestCase;
-use Shopware\Core\Content\NewsletterReceiver\Exception\NewsletterReceiverNotFoundException;
-use Shopware\Core\Content\NewsletterReceiver\NewsletterReceiverEntity;
-use Shopware\Core\Content\NewsletterReceiver\SalesChannel\NewsletterSubscriptionService;
-use Shopware\Core\Content\NewsletterReceiver\SalesChannel\NewsletterSubscriptionServiceInterface;
+use Shopware\Core\Content\NewsletterRecipient\Exception\NewsletterRecipientNotFoundException;
+use Shopware\Core\Content\NewsletterRecipient\NewsletterRecipientEntity;
+use Shopware\Core\Content\NewsletterRecipient\SalesChannel\NewsletterSubscriptionService;
+use Shopware\Core\Content\NewsletterRecipient\SalesChannel\NewsletterSubscriptionServiceInterface;
 use Shopware\Core\Defaults;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
@@ -21,7 +21,7 @@ use Shopware\Core\Framework\Validation\DataValidator;
 use Shopware\Core\Framework\Validation\Exception\ConstraintViolationException;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory;
 
-class NewsletterReceiverServiceTest extends TestCase
+class NewsletterRecipientServiceTest extends TestCase
 {
     use IntegrationTestBehaviour;
 
@@ -79,7 +79,7 @@ class NewsletterReceiverServiceTest extends TestCase
         ];
     }
 
-    public function testSubscribeNewsletterShouldSaveReceiverToDatabase(): void
+    public function testSubscribeNewsletterShouldSaveRecipientToDatabase(): void
     {
         $this->installTestData();
         $email = 'valid@email.foo';
@@ -97,23 +97,23 @@ class NewsletterReceiverServiceTest extends TestCase
         $this->getService()->subscribe($dataBag, $context);
 
         /** @var EntityRepositoryInterface $repository */
-        $repository = $this->getContainer()->get('newsletter_receiver.repository');
+        $repository = $this->getContainer()->get('newsletter_recipient.repository');
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsFilter('email', $email));
 
-        /** @var NewsletterReceiverEntity $result */
+        /** @var NewsletterRecipientEntity $result */
         $result = $repository->search($criteria, $context->getContext())->getEntities()->first();
 
-        static::assertInstanceOf(NewsletterReceiverEntity::class, $result);
+        static::assertInstanceOf(NewsletterRecipientEntity::class, $result);
         static::assertSame($email, $result->getEmail());
         static::assertSame('notSet', $result->getStatus());
     }
 
-    public function testConfirmSubscribeNewsletterExpectsNewsletterReceiverNotFoundException(): void
+    public function testConfirmSubscribeNewsletterExpectsNewsletterRecipientNotFoundException(): void
     {
         $dataBag = new RequestDataBag(['hash' => 'notExistentHash']);
 
-        self::expectException(NewsletterReceiverNotFoundException::class);
+        self::expectException(NewsletterRecipientNotFoundException::class);
 
         $salesChannelContextFactory = $this->getContainer()->get(SalesChannelContextFactory::class);
         $context = $salesChannelContextFactory->create(Uuid::randomHex(), Defaults::SALES_CHANNEL);
@@ -155,21 +155,21 @@ class NewsletterReceiverServiceTest extends TestCase
         $this->getService()->confirm($dataBag, $context);
 
         /** @var EntityRepositoryInterface $repository */
-        $repository = $this->getContainer()->get('newsletter_receiver.repository');
+        $repository = $this->getContainer()->get('newsletter_recipient.repository');
 
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsFilter('email', $email));
 
-        /** @var NewsletterReceiverEntity $result */
+        /** @var NewsletterRecipientEntity $result */
         $result = $repository->search($criteria, Context::createDefaultContext())->getEntities()->first();
 
-        static::assertInstanceOf(NewsletterReceiverEntity::class, $result);
+        static::assertInstanceOf(NewsletterRecipientEntity::class, $result);
         static::assertNotNull($result->getConfirmedAt());
         static::assertSame((new \DateTime())->format('y-m-d'), $result->getConfirmedAt()->format('y-m-d'));
         static::assertSame(NewsletterSubscriptionServiceInterface::STATUS_OPT_IN, $result->getStatus());
     }
 
-    public function testUnsubscribeNewsletterExpectsNewsletterReceiverNotFoundException(): void
+    public function testUnsubscribeNewsletterExpectsNewsletterRecipientNotFoundException(): void
     {
         $this->installTestData();
         $email = 'not@existend.email';
@@ -179,7 +179,7 @@ class NewsletterReceiverServiceTest extends TestCase
             'option' => 'unsubscribe',
         ]);
 
-        self::expectException(NewsletterReceiverNotFoundException::class);
+        self::expectException(NewsletterRecipientNotFoundException::class);
 
         $salesChannelContextFactory = $this->getContainer()->get(SalesChannelContextFactory::class);
         $context = $salesChannelContextFactory->create(Uuid::randomHex(), Defaults::SALES_CHANNEL);
@@ -227,15 +227,15 @@ class NewsletterReceiverServiceTest extends TestCase
         $this->getService()->unsubscribe($dataBag, $context);
 
         /** @var EntityRepositoryInterface $repository */
-        $repository = $this->getContainer()->get('newsletter_receiver.repository');
+        $repository = $this->getContainer()->get('newsletter_recipient.repository');
 
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsFilter('email', $email));
 
-        /** @var NewsletterReceiverEntity $result */
+        /** @var NewsletterRecipientEntity $result */
         $result = $repository->search($criteria, Context::createDefaultContext())->getEntities()->first();
 
-        static::assertInstanceOf(NewsletterReceiverEntity::class, $result);
+        static::assertInstanceOf(NewsletterRecipientEntity::class, $result);
         static::assertSame($email, $result->getEmail());
         static::assertNotNull($result->getUpdatedAt());
         static::assertSame((new \DateTime())->format('y-m-d'), $result->getUpdatedAt()->format('y-m-d'));
@@ -246,8 +246,8 @@ class NewsletterReceiverServiceTest extends TestCase
         $salutationSql = file_get_contents(__DIR__ . '/../fixtures/salutation.sql');
         $this->getContainer()->get(Connection::class)->exec($salutationSql);
 
-        $receiverSql = file_get_contents(__DIR__ . '/../fixtures/receiver.sql');
-        $this->getContainer()->get(Connection::class)->exec($receiverSql);
+        $recipientSql = file_get_contents(__DIR__ . '/../fixtures/recipient.sql');
+        $this->getContainer()->get(Connection::class)->exec($recipientSql);
 
         $templateSql = file_get_contents(__DIR__ . '/../fixtures/template.sql');
         $this->getContainer()->get(Connection::class)->exec($templateSql);
@@ -256,7 +256,7 @@ class NewsletterReceiverServiceTest extends TestCase
     private function getService(): NewsletterSubscriptionService
     {
         return new NewsletterSubscriptionService(
-            $this->getContainer()->get('newsletter_receiver.repository'),
+            $this->getContainer()->get('newsletter_recipient.repository'),
             $this->getContainer()->get(DataValidator::class),
             $this->getContainer()->get('event_dispatcher')
         );

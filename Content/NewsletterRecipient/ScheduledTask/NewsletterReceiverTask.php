@@ -1,14 +1,14 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Content\NewsletterReceiver\ScheduledTask;
+namespace Shopware\Core\Content\NewsletterRecipient\ScheduledTask;
 
 use Shopware\Core\Framework\ScheduledTask\ScheduledTask;
 
-class NewsletterReceiverTask extends ScheduledTask
+class NewsletterRecipientTask extends ScheduledTask
 {
     public static function getTaskName(): string
     {
-        return 'delete_newsletter_receiver_task';
+        return 'delete_newsletter_recipient_task';
     }
 
     public static function getDefaultInterval(): int

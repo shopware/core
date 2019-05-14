@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Content\NewsletterReceiver\SalesChannel;
+namespace Shopware\Core\Content\NewsletterRecipient\SalesChannel;
 
-use Shopware\Core\Content\NewsletterReceiver\Event\NewsletterConfirmEvent;
-use Shopware\Core\Content\NewsletterReceiver\Event\NewsletterRegisterEvent;
-use Shopware\Core\Content\NewsletterReceiver\Exception\NewsletterReceiverNotFoundException;
-use Shopware\Core\Content\NewsletterReceiver\NewsletterReceiverEntity;
+use Shopware\Core\Content\NewsletterRecipient\Event\NewsletterConfirmEvent;
+use Shopware\Core\Content\NewsletterRecipient\Event\NewsletterRegisterEvent;
+use Shopware\Core\Content\NewsletterRecipient\Exception\NewsletterRecipientNotFoundException;
+use Shopware\Core\Content\NewsletterRecipient\NewsletterRecipientEntity;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
@@ -28,7 +28,7 @@ class NewsletterSubscriptionService implements NewsletterSubscriptionServiceInte
     /**
      * @var EntityRepositoryInterface
      */
-    private $newsletterReceiverRepository;
+    private $newsletterRecipientRepository;
 
     /**
      * @var DataValidator
@@ -41,11 +41,11 @@ class NewsletterSubscriptionService implements NewsletterSubscriptionServiceInte
     private $eventDispatcher;
 
     public function __construct(
-        EntityRepositoryInterface $newsletterReceiverRepository,
+        EntityRepositoryInterface $newsletterRecipientRepository,
         DataValidator $validator,
         EventDispatcherInterface $eventDispatcher
     ) {
-        $this->newsletterReceiverRepository = $newsletterReceiverRepository;
+        $this->newsletterRecipientRepository = $newsletterRecipientRepository;
         $this->validator = $validator;
         $this->eventDispatcher = $eventDispatcher;
     }
@@ -57,12 +57,12 @@ class NewsletterSubscriptionService implements NewsletterSubscriptionServiceInte
 
         $data = $this->completeData($dataBag->all(), $context);
 
-        $this->newsletterReceiverRepository->upsert([$data], $context->getContext());
+        $this->newsletterRecipientRepository->upsert([$data], $context->getContext());
 
-        $receiver = $this->getNewsletterReceiver('email', $data['email'], $context->getContext());
+        $recipient = $this->getNewsletterRecipient('email', $data['email'], $context->getContext());
 
         if ($data['status'] === self::STATUS_DIRECT) {
-            $event = new NewsletterConfirmEvent($context->getContext(), $receiver, $context->getSalesChannel()->getId());
+            $event = new NewsletterConfirmEvent($context->getContext(), $recipient, $context->getSalesChannel()->getId());
             $this->eventDispatcher->dispatch(NewsletterConfirmEvent::EVENT_NAME, $event);
 
             return;
@@ -75,39 +75,39 @@ class NewsletterSubscriptionService implements NewsletterSubscriptionServiceInte
             $data['hash']
         );
 
-        $event = new NewsletterRegisterEvent($context->getContext(), $receiver, $url, $context->getSalesChannel()->getId());
+        $event = new NewsletterRegisterEvent($context->getContext(), $recipient, $url, $context->getSalesChannel()->getId());
         $this->eventDispatcher->dispatch(NewsletterRegisterEvent::EVENT_NAME, $event);
     }
 
     public function confirm(DataBag $dataBag, SalesChannelContext $context): void
     {
-        $receiver = $this->getNewsletterReceiver('hash', $dataBag->get('hash'), $context->getContext());
+        $recipient = $this->getNewsletterRecipient('hash', $dataBag->get('hash'), $context->getContext());
 
         $data = [
-            'id' => $receiver->getId(),
-            'status' => $receiver->getStatus(),
-            'confirmedAt' => $receiver->getConfirmedAt(),
+            'id' => $recipient->getId(),
+            'status' => $recipient->getStatus(),
+            'confirmedAt' => $recipient->getConfirmedAt(),
             'em' => $dataBag->get('em'),
         ];
 
-        $this->validator->validate($data, $this->getBeforeConfirmSubscribeValidation(hash('sha1', $receiver->getEmail())));
+        $this->validator->validate($data, $this->getBeforeConfirmSubscribeValidation(hash('sha1', $recipient->getEmail())));
 
         $data['status'] = self::STATUS_OPT_IN;
         $data['confirmedAt'] = new \DateTime();
 
-        $this->newsletterReceiverRepository->update([$data], $context->getContext());
+        $this->newsletterRecipientRepository->update([$data], $context->getContext());
 
-        $event = new NewsletterConfirmEvent($context->getContext(), $receiver, $context->getSalesChannel()->getId());
+        $event = new NewsletterConfirmEvent($context->getContext(), $recipient, $context->getSalesChannel()->getId());
         $this->eventDispatcher->dispatch(NewsletterConfirmEvent::EVENT_NAME, $event);
     }
 
     public function unsubscribe(DataBag $dataBag, SalesChannelContext $context): void
     {
         $data = $dataBag->all();
-        $data['id'] = $this->getNewsletterReceiverId($data['email'], $context);
+        $data['id'] = $this->getNewsletterRecipientId($data['email'], $context);
 
         if (empty($data['id'])) {
-            throw new NewsletterReceiverNotFoundException('email', $data['email']);
+            throw new NewsletterRecipientNotFoundException('email', $data['email']);
         }
 
         $data['status'] = $this->getOptionSelection()[$data['option']];
@@ -116,7 +116,7 @@ class NewsletterSubscriptionService implements NewsletterSubscriptionServiceInte
         $validator = $this->getOptOutValidation();
         $this->validator->validate($data, $validator);
 
-        $this->newsletterReceiverRepository->update([$data], $context->getContext());
+        $this->newsletterRecipientRepository->update([$data], $context->getContext());
     }
 
     private function getOptionSelection(): array
@@ -131,7 +131,7 @@ class NewsletterSubscriptionService implements NewsletterSubscriptionServiceInte
 
     private function getOptInValidator(): DataValidationDefinition
     {
-        $definition = new DataValidationDefinition('newsletter_receiver.create');
+        $definition = new DataValidationDefinition('newsletter_recipient.create');
         $definition->add('email', new NotBlank(), new Email())
             ->add('option', new NotBlank(), new Choice(array_keys($this->getOptionSelection())));
 
@@ -140,7 +140,7 @@ class NewsletterSubscriptionService implements NewsletterSubscriptionServiceInte
 
     private function getOptOutValidation(): DataValidationDefinition
     {
-        $definition = new DataValidationDefinition('newsletter_receiver.opt_out');
+        $definition = new DataValidationDefinition('newsletter_recipient.opt_out');
         $definition->add('email', new NotBlank(), new Email())
             ->add('status', new EqualTo(['value' => self::STATUS_OPT_OUT]))
             ->add('id', new NotBlank());
@@ -150,7 +150,7 @@ class NewsletterSubscriptionService implements NewsletterSubscriptionServiceInte
 
     private function getBeforeConfirmSubscribeValidation(string $emHash): DataValidationDefinition
     {
-        $definition = new DataValidationDefinition('newsletter_receiver.opt_in_before');
+        $definition = new DataValidationDefinition('newsletter_recipient.opt_in_before');
         $definition->add('id', new NotBlank())
             ->add('confirmedAt', new IsNull())
             ->add('status', new EqualTo(['value' => self::STATUS_NOT_SET]))
@@ -161,7 +161,7 @@ class NewsletterSubscriptionService implements NewsletterSubscriptionServiceInte
 
     private function completeData(array $data, SalesChannelContext $context): array
     {
-        $id = $this->getNewsletterReceiverId($data['email'], $context);
+        $id = $this->getNewsletterRecipientId($data['email'], $context);
 
         $data['id'] = $id ?: Uuid::randomHex();
         $data['languageId'] = $context->getContext()->getLanguageId();
@@ -172,7 +172,7 @@ class NewsletterSubscriptionService implements NewsletterSubscriptionServiceInte
         return $data;
     }
 
-    private function getNewsletterReceiverId(string $email, SalesChannelContext $context): ?string
+    private function getNewsletterRecipientId(string $email, SalesChannelContext $context): ?string
     {
         $criteria = new Criteria();
         $criteria->addFilter(new MultiFilter(MultiFilter::CONNECTION_AND),
@@ -181,25 +181,25 @@ class NewsletterSubscriptionService implements NewsletterSubscriptionServiceInte
         );
         $criteria->setLimit(1);
 
-        $ids = $this->newsletterReceiverRepository->searchIds($criteria, $context->getContext())->getIds();
+        $ids = $this->newsletterRecipientRepository->searchIds($criteria, $context->getContext())->getIds();
 
         return array_shift(
             $ids
         );
     }
 
-    private function getNewsletterReceiver(string $identifier, string $value, Context $context): NewsletterReceiverEntity
+    private function getNewsletterRecipient(string $identifier, string $value, Context $context): NewsletterRecipientEntity
     {
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsFilter($identifier, $value));
         $criteria->setLimit(1);
 
-        $newsletterReceiver = $this->newsletterReceiverRepository->search($criteria, $context)->getEntities()->first();
+        $newsletterRecipient = $this->newsletterRecipientRepository->search($criteria, $context)->getEntities()->first();
 
-        if (empty($newsletterReceiver)) {
-            throw new NewsletterReceiverNotFoundException($identifier, $value);
+        if (empty($newsletterRecipient)) {
+            throw new NewsletterRecipientNotFoundException($identifier, $value);
         }
 
-        return $newsletterReceiver;
+        return $newsletterRecipient;
     }
 }

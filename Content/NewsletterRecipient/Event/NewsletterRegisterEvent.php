@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Content\NewsletterReceiver\Event;
+namespace Shopware\Core\Content\NewsletterRecipient\Event;
 
-use Shopware\Core\Content\NewsletterReceiver\NewsletterReceiverDefinition;
-use Shopware\Core\Content\NewsletterReceiver\NewsletterReceiverEntity;
+use Shopware\Core\Content\NewsletterRecipient\NewsletterRecipientDefinition;
+use Shopware\Core\Content\NewsletterRecipient\NewsletterRecipientEntity;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\Event\BusinessEventInterface;
 use Shopware\Core\Framework\Event\EventData\EntityType;
@@ -12,9 +12,9 @@ use Shopware\Core\Framework\Event\EventData\MailRecipientStruct;
 use Shopware\Core\Framework\Event\MailActionInterface;
 use Symfony\Component\EventDispatcher\Event;
 
-class NewsletterConfirmEvent extends Event implements BusinessEventInterface, MailActionInterface
+class NewsletterRegisterEvent extends Event implements BusinessEventInterface, MailActionInterface
 {
-    public const EVENT_NAME = 'newsletter.confirm';
+    public const EVENT_NAME = 'newsletter.register';
 
     /**
      * @var Context
@@ -22,9 +22,9 @@ class NewsletterConfirmEvent extends Event implements BusinessEventInterface, Ma
     private $context;
 
     /**
-     * @var NewsletterReceiverEntity
+     * @var NewsletterRecipientEntity
      */
-    private $receiverEntity;
+    private $recipientEntity;
 
     /**
      * @var MailRecipientStruct|null
@@ -34,13 +34,25 @@ class NewsletterConfirmEvent extends Event implements BusinessEventInterface, Ma
     /**
      * @var string
      */
+    private $url;
+
+    /**
+     * @var string
+     */
     private $salesChannelId;
 
-    public function __construct(Context $context, NewsletterReceiverEntity $receiverEntity, string $salesChannelId)
+    public function __construct(Context $context, NewsletterRecipientEntity $recipientEntity, string $url, string $salesChannelId)
     {
         $this->context = $context;
-        $this->receiverEntity = $receiverEntity;
+        $this->recipientEntity = $recipientEntity;
+        $this->url = $url;
         $this->salesChannelId = $salesChannelId;
+    }
+
+    public static function getAvailableData(): EventDataCollection
+    {
+        return (new EventDataCollection())
+            ->add('recipientEntity', new EntityType(NewsletterRecipientDefinition::class));
     }
 
     public function getName(): string
@@ -53,15 +65,14 @@ class NewsletterConfirmEvent extends Event implements BusinessEventInterface, Ma
         return $this->context;
     }
 
-    public static function getAvailableData(): EventDataCollection
+    public function getRecipientEntity(): NewsletterRecipientEntity
     {
-        return (new EventDataCollection())
-            ->add('receiverEntity', new EntityType(NewsletterReceiverDefinition::class));
+        return $this->recipientEntity;
     }
 
-    public function getReceiverEntity(): NewsletterReceiverEntity
+    public function getUrl(): string
     {
-        return $this->receiverEntity;
+        return $this->url;
     }
 
     public function getMailStruct(): MailRecipientStruct
@@ -72,7 +83,7 @@ class NewsletterConfirmEvent extends Event implements BusinessEventInterface, Ma
 
         return new MailRecipientStruct(
             [
-                $this->receiverEntity->getEmail() => $this->receiverEntity->getFirstName() . ' ' . $this->receiverEntity->getLastName(),
+                $this->recipientEntity->getEmail() => $this->recipientEntity->getFirstName() . ' ' . $this->recipientEntity->getLastName(),
             ]
         );
     }

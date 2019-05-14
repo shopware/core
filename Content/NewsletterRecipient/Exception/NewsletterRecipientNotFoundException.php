@@ -1,23 +1,23 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Content\NewsletterReceiver\Exception;
+namespace Shopware\Core\Content\NewsletterRecipient\Exception;
 
 use Shopware\Core\Framework\ShopwareHttpException;
 use Symfony\Component\HttpFoundation\Response;
 
-class NewsletterReceiverNotFoundException extends ShopwareHttpException
+class NewsletterRecipientNotFoundException extends ShopwareHttpException
 {
     public function __construct(string $identifier, string $value)
     {
         parent::__construct(
-            'The NewsletterReceiver with the identifier "{{ identifier }}" - {{ value }} was not found.',
+            'The NewsletterRecipient with the identifier "{{ identifier }}" - {{ value }} was not found.',
             ['identifier' => $identifier, 'value' => $value]
         );
     }
 
     public function getErrorCode(): string
     {
-        return 'FRAMEWORK__NEWSLETTER_RECEIVER_NOT_FOUND';
+        return 'FRAMEWORK__NEWSLETTER_RECIPIENT_NOT_FOUND';
     }
 
     public function getStatusCode(): int

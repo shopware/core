@@ -1,10 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Content\Test\NewsletterReceiver\ScheduledTask;
+namespace Shopware\Core\Content\Test\NewsletterRecipient\ScheduledTask;
 
 use Doctrine\DBAL\Connection;
 use PHPUnit\Framework\TestCase;
-use Shopware\Core\Content\NewsletterReceiver\ScheduledTask\NewsletterReceiverTaskHandler;
+use Shopware\Core\Content\NewsletterRecipient\ScheduledTask\NewsletterRecipientTaskHandler;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
@@ -13,14 +13,14 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\RangeFilter;
 use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
 use Shopware\Core\Framework\Test\TestCaseHelper\ReflectionHelper;
 
-class NewsletterReceiverTaskHandlerTest extends TestCase
+class NewsletterRecipientTaskHandlerTest extends TestCase
 {
     use IntegrationTestBehaviour;
 
-    public function testGetExpiredNewsletterReceiverCriteria(): void
+    public function testGetExpiredNewsletterRecipientCriteria(): void
     {
         $taskHandler = $this->getTaskHandler();
-        $method = ReflectionHelper::getMethod(NewsletterReceiverTaskHandler::class, 'getExpiredNewsletterReceiverCriteria');
+        $method = ReflectionHelper::getMethod(NewsletterRecipientTaskHandler::class, 'getExpiredNewsletterRecipientCriteria');
 
         /** @var Criteria $criteria */
         $criteria = $method->invoke($taskHandler);
@@ -47,7 +47,7 @@ class NewsletterReceiverTaskHandlerTest extends TestCase
         $taskHandler->run();
 
         /** @var EntityRepositoryInterface $repository */
-        $repository = $this->getContainer()->get('newsletter_receiver.repository');
+        $repository = $this->getContainer()->get('newsletter_recipient.repository');
         $result = $repository->searchIds(new Criteria(), Context::createDefaultContext());
 
         $expectedResult = [
@@ -65,18 +65,18 @@ class NewsletterReceiverTaskHandlerTest extends TestCase
         $salutationSql = file_get_contents(__DIR__ . '/../fixtures/salutation.sql');
         $this->getContainer()->get(Connection::class)->exec($salutationSql);
 
-        $receiverSql = file_get_contents(__DIR__ . '/../fixtures/receiver.sql');
-        $this->getContainer()->get(Connection::class)->exec($receiverSql);
+        $recipientSql = file_get_contents(__DIR__ . '/../fixtures/recipient.sql');
+        $this->getContainer()->get(Connection::class)->exec($recipientSql);
 
         $templateSql = file_get_contents(__DIR__ . '/../fixtures/template.sql');
         $this->getContainer()->get(Connection::class)->exec($templateSql);
     }
 
-    private function getTaskHandler(): NewsletterReceiverTaskHandler
+    private function getTaskHandler(): NewsletterRecipientTaskHandler
     {
-        return new NewsletterReceiverTaskHandler(
+        return new NewsletterRecipientTaskHandler(
             $this->getContainer()->get('scheduled_task.repository'),
-            $this->getContainer()->get('newsletter_receiver.repository')
+            $this->getContainer()->get('newsletter_recipient.repository')
         );
     }
 }
