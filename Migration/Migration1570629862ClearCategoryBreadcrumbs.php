@@ -5,20 +5,20 @@ namespace Shopware\Core\Migration;
 use Doctrine\DBAL\Connection;
 use Shopware\Core\Framework\Migration\MigrationStep;
 
-class Migration1566817701AddDisplayGroup extends MigrationStep
+class Migration1570629862ClearCategoryBreadcrumbs extends MigrationStep
 {
     public function getCreationTimestamp(): int
     {
-        return 1566817701;
+        return 1570629862;
     }
 
     public function update(Connection $connection): void
     {
-        $connection->executeUpdate('ALTER TABLE `product` ADD `display_group` varchar(50) NULL AFTER `display_in_listing`;');
+        $connection->exec('UPDATE `category_translation` SET `breadcrumb` = NULL');
     }
 
     public function updateDestructive(Connection $connection): void
     {
-        $connection->executeUpdate('ALTER TABLE `product` DROP COLUMN `display_in_listing`;');
+        // implement update destructive
     }
 }
