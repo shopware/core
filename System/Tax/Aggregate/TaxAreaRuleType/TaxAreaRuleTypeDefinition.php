@@ -1,25 +1,25 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\System\Tax;
+namespace Shopware\Core\System\Tax\Aggregate\TaxAreaRuleType;
 
-use Shopware\Core\Content\Product\ProductDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityDefinition;
-use Shopware\Core\Framework\DataAbstractionLayer\Field\CustomFields;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\PrimaryKey;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\Required;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\RestrictDelete;
-use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\ReverseInherited;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\SearchRanking;
-use Shopware\Core\Framework\DataAbstractionLayer\Field\FloatField;
+use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\WriteProtected;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\IdField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\OneToManyAssociationField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\StringField;
+use Shopware\Core\Framework\DataAbstractionLayer\Field\TranslatedField;
+use Shopware\Core\Framework\DataAbstractionLayer\Field\TranslationsAssociationField;
 use Shopware\Core\Framework\DataAbstractionLayer\FieldCollection;
 use Shopware\Core\System\Tax\Aggregate\TaxAreaRule\TaxAreaRuleDefinition;
+use Shopware\Core\System\Tax\Aggregate\TaxAreaRuleTypeTranslation\TaxAreaRuleTypeTranslationDefinition;
 
-class TaxDefinition extends EntityDefinition
+class TaxAreaRuleTypeDefinition extends EntityDefinition
 {
-    public const ENTITY_NAME = 'tax';
+    public const ENTITY_NAME = 'tax_area_rule_type';
 
     public function getEntityName(): string
     {
@@ -28,23 +28,22 @@ class TaxDefinition extends EntityDefinition
 
     public function getCollectionClass(): string
     {
-        return TaxCollection::class;
+        return TaxAreaRuleTypeCollection::class;
     }
 
     public function getEntityClass(): string
     {
-        return TaxEntity::class;
+        return TaxAreaRuleTypeEntity::class;
     }
 
     protected function defineFields(): FieldCollection
     {
         return new FieldCollection([
             (new IdField('id', 'id'))->addFlags(new PrimaryKey(), new Required()),
-            (new FloatField('tax_rate', 'taxRate'))->addFlags(new Required(), new SearchRanking(SearchRanking::HIGH_SEARCH_RANKING)),
-            (new StringField('name', 'name'))->addFlags(new Required(), new SearchRanking(SearchRanking::HIGH_SEARCH_RANKING)),
-            new CustomFields(),
-            (new OneToManyAssociationField('products', ProductDefinition::class, 'tax_id', 'id'))->addFlags(new RestrictDelete(), new ReverseInherited('tax')),
-            (new OneToManyAssociationField('taxAreaRules', TaxAreaRuleDefinition::class, 'tax_id', 'id'))->addFlags(new RestrictDelete()),
+            (new StringField('technical_name', 'technicalName'))->addFlags(new Required(), new WriteProtected()),
+            (new TranslatedField('typeName'))->addFlags(new SearchRanking(SearchRanking::HIGH_SEARCH_RANKING)),
+            (new OneToManyAssociationField('taxAreaRules', TaxAreaRuleDefinition::class, 'tax_area_rule_type_id'))->addFlags(new RestrictDelete()),
+            (new TranslationsAssociationField(TaxAreaRuleTypeTranslationDefinition::class, 'tax_area_rule_type_id'))->addFlags(new Required()),
         ]);
     }
 }
