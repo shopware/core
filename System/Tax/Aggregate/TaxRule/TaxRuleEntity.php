@@ -1,14 +1,14 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\System\Tax\Aggregate\TaxAreaRule;
+namespace Shopware\Core\System\Tax\Aggregate\TaxRule;
 
 use Shopware\Core\Framework\DataAbstractionLayer\Entity;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityIdTrait;
 use Shopware\Core\System\Country\CountryEntity;
-use Shopware\Core\System\Tax\Aggregate\TaxAreaRuleType\TaxAreaRuleTypeEntity;
+use Shopware\Core\System\Tax\Aggregate\TaxRuleType\TaxRuleTypeEntity;
 use Shopware\Core\System\Tax\TaxEntity;
 
-class TaxAreaRuleEntity extends Entity
+class TaxRuleEntity extends Entity
 {
     use EntityIdTrait;
 
@@ -35,12 +35,12 @@ class TaxAreaRuleEntity extends Entity
     /**
      * @var string
      */
-    protected $taxAreaRuleTypeId;
+    protected $taxRuleTypeId;
 
     /**
-     * @var TaxAreaRuleTypeEntity
+     * @var TaxRuleTypeEntity
      */
-    protected $taxAreaRuleType;
+    protected $type;
 
     /**
      * @var float
@@ -92,24 +92,24 @@ class TaxAreaRuleEntity extends Entity
         $this->country = $country;
     }
 
-    public function getTaxAreaRuleTypeId(): string
+    public function getTaxRuleTypeId(): string
     {
-        return $this->taxAreaRuleTypeId;
+        return $this->taxRuleTypeId;
     }
 
-    public function setTaxAreaRuleTypeId(string $taxAreaRuleTypeId): void
+    public function setTaxRuleTypeId(string $taxRuleTypeId): void
     {
-        $this->taxAreaRuleTypeId = $taxAreaRuleTypeId;
+        $this->taxRuleTypeId = $taxRuleTypeId;
     }
 
-    public function getTaxAreaRuleType(): TaxAreaRuleTypeEntity
+    public function getType(): TaxRuleTypeEntity
     {
-        return $this->taxAreaRuleType;
+        return $this->type;
     }
 
-    public function setTaxAreaRuleType(TaxAreaRuleTypeEntity $taxAreaRuleType): void
+    public function setType(TaxRuleTypeEntity $type): void
     {
-        $this->taxAreaRuleType = $taxAreaRuleType;
+        $this->type = $type;
     }
 
     public function getTaxRate(): float

@@ -6,13 +6,13 @@ use Doctrine\DBAL\Connection;
 use Shopware\Core\Defaults;
 use Shopware\Core\Framework\Migration\MigrationStep;
 use Shopware\Core\Framework\Uuid\Uuid;
-use Shopware\Core\System\Tax\Aggregate\TaxAreaRuleType\TaxAreaRuleTypeDefinition;
-use Shopware\Core\System\Tax\TaxAreaRuleType\EntireCountryRuleTypeFilter;
-use Shopware\Core\System\Tax\TaxAreaRuleType\IndividualStatesRuleTypeFilter;
-use Shopware\Core\System\Tax\TaxAreaRuleType\ZipCodeRangeRuleTypeFilter;
-use Shopware\Core\System\Tax\TaxAreaRuleType\ZipCodeRuleTypeFilter;
+use Shopware\Core\System\Tax\Aggregate\TaxRuleType\TaxRuleTypeDefinition;
+use Shopware\Core\System\Tax\TaxRuleType\EntireCountryRuleTypeFilter;
+use Shopware\Core\System\Tax\TaxRuleType\IndividualStatesRuleTypeFilter;
+use Shopware\Core\System\Tax\TaxRuleType\ZipCodeRangeRuleTypeFilter;
+use Shopware\Core\System\Tax\TaxRuleType\ZipCodeRuleTypeFilter;
 
-class Migration1572193798TaxAreaRule extends MigrationStep
+class Migration1572193798TaxRule extends MigrationStep
 {
     public function getCreationTimestamp(): int
     {
@@ -22,7 +22,7 @@ class Migration1572193798TaxAreaRule extends MigrationStep
     public function update(Connection $connection): void
     {
         $this->createTables($connection);
-        $this->addTaxAreaRuleTypes($connection);
+        $this->addTaxRuleTypes($connection);
     }
 
     public function updateDestructive(Connection $connection): void
@@ -33,10 +33,11 @@ class Migration1572193798TaxAreaRule extends MigrationStep
     public function createTables(Connection $connection): void
     {
         $connection->executeQuery('
-            CREATE TABLE `tax_area_rule_type`
+            CREATE TABLE `tax_rule_type`
             (
                 `id` BINARY(16) NOT NULL,
                 `technical_name` VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+                `position` INT(11) NOT NULL,
                 `created_at` DATETIME(3) NOT NULL,
                 `updated_at` DATETIME(3) NULL,
                 PRIMARY KEY (`id`),
@@ -44,44 +45,44 @@ class Migration1572193798TaxAreaRule extends MigrationStep
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ');
         $connection->executeQuery('
-            CREATE TABLE `tax_area_rule_type_translation`
+            CREATE TABLE `tax_rule_type_translation`
             (
-                `tax_area_rule_type_id` BINARY(16) NOT NULL,
+                `tax_rule_type_id` BINARY(16) NOT NULL,
                 `language_id` BINARY(16) NOT NULL,
                 `type_name` VARCHAR(255) NOT NULL,
                 `created_at` DATETIME(3) NOT NULL,
                 `updated_at` DATETIME(3) NULL,
-                PRIMARY KEY (`tax_area_rule_type_id`, `language_id`),
-                CONSTRAINT `fk.tax_area_rule_type_translation.tax_area_rule_type_id`
-                    FOREIGN KEY (`tax_area_rule_type_id`) REFERENCES `tax_area_rule_type` (`id`),
-                CONSTRAINT `fk.tax_area_rule_type_translation.language_id`
+                PRIMARY KEY (`tax_rule_type_id`, `language_id`),
+                CONSTRAINT `fk.tax_rule_type_translation.tax_rule_type_id`
+                    FOREIGN KEY (`tax_rule_type_id`) REFERENCES `tax_rule_type` (`id`),
+                CONSTRAINT `fk.tax_rule_type_translation.language_id`
                     FOREIGN KEY (`language_id`) REFERENCES `language` (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ');
         $connection->executeQuery('
-            CREATE TABLE `tax_area_rule`
+            CREATE TABLE `tax_rule`
             (
                 `id` BINARY(16) NOT NULL,
                 `tax_id` BINARY(16) NOT NULL,
-                `tax_area_rule_type_id` BINARY(16) NOT NULL,
+                `tax_rule_type_id` BINARY(16) NOT NULL,
                 `country_id` BINARY(16) NOT NULL,
                 `tax_rate` DOUBLE(10,2) NOT NULL,
                 `data` JSON NULL,
                 `created_at` DATETIME(3) NOT NULL,
                 `updated_at` DATETIME(3) NULL,
                 PRIMARY KEY (`id`),
-                CONSTRAINT `json.tax_area_rule.data` CHECK(JSON_VALID(`data`)),
-                CONSTRAINT `fk.tax_area_rule.tax_id`
+                CONSTRAINT `json.tax_rule.data` CHECK(JSON_VALID(`data`)),
+                CONSTRAINT `fk.tax_rule.tax_id`
                     FOREIGN KEY (`tax_id`) REFERENCES `tax` (`id`),
-                CONSTRAINT `fk.tax_area_rule.tax_area_rule_type_id`
-                    FOREIGN KEY (`tax_area_rule_type_id`) REFERENCES `tax_area_rule_type` (`id`),
-                CONSTRAINT `fk.tax_area_rule.country_id`
+                CONSTRAINT `fk.tax_rule.tax_area_rule_type_id`
+                    FOREIGN KEY (`tax_rule_type_id`) REFERENCES `tax_rule_type` (`id`),
+                CONSTRAINT `fk.tax_rule.country_id`
                     FOREIGN KEY (`country_id`) REFERENCES `country` (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ');
     }
 
-    private function addTaxAreaRuleTypes(Connection $connection): void
+    private function addTaxRuleTypes(Connection $connection): void
     {
         $languageIdEn = $this->getLocaleId($connection, 'en-GB');
         $languageIdDe = $this->getLocaleId($connection, 'de-DE');
@@ -119,19 +120,20 @@ class Migration1572193798TaxAreaRule extends MigrationStep
 
         foreach (
             [
-                EntireCountryRuleTypeFilter::TECHNICAL_NAME,
-                IndividualStatesRuleTypeFilter::TECHNICAL_NAME,
-                ZipCodeRangeRuleTypeFilter::TECHNICAL_NAME,
                 ZipCodeRuleTypeFilter::TECHNICAL_NAME,
-            ] as $technicalName
+                ZipCodeRangeRuleTypeFilter::TECHNICAL_NAME,
+                IndividualStatesRuleTypeFilter::TECHNICAL_NAME,
+                EntireCountryRuleTypeFilter::TECHNICAL_NAME,
+            ] as $position => $technicalName
         ) {
             $typeId = Uuid::randomBytes();
             $typeData = [
                 'id' => $typeId,
                 'technical_name' => $technicalName,
+                'position' => $position,
                 'created_at' => date(Defaults::STORAGE_DATE_TIME_FORMAT),
             ];
-            $connection->insert(TaxAreaRuleTypeDefinition::ENTITY_NAME, $typeData);
+            $connection->insert(TaxRuleTypeDefinition::ENTITY_NAME, $typeData);
 
             if (!in_array($languageSystem, [$languageIdDe, $languageIdEn], true)) {
                 $this->insertTranslation($connection, $dataEn[$technicalName], $typeId, $languageSystem);
@@ -171,9 +173,9 @@ class Migration1572193798TaxAreaRule extends MigrationStep
         $data = array_merge($data, [
             'created_at' => date(Defaults::STORAGE_DATE_TIME_FORMAT),
             'language_id' => $languageId,
-            'tax_area_rule_type_id' => $typeId,
+            'tax_rule_type_id' => $typeId,
         ]);
 
-        $connection->insert('tax_area_rule_type_translation', $data);
+        $connection->insert('tax_rule_type_translation', $data);
     }
 }

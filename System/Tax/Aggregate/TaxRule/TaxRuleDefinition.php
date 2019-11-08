@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\System\Tax\Aggregate\TaxAreaRule;
+namespace Shopware\Core\System\Tax\Aggregate\TaxRule;
 
 use Shopware\Core\Framework\DataAbstractionLayer\EntityDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\FkField;
@@ -15,12 +15,12 @@ use Shopware\Core\Framework\DataAbstractionLayer\Field\ManyToOneAssociationField
 use Shopware\Core\Framework\DataAbstractionLayer\Field\StringField;
 use Shopware\Core\Framework\DataAbstractionLayer\FieldCollection;
 use Shopware\Core\System\Country\CountryDefinition;
-use Shopware\Core\System\Tax\Aggregate\TaxAreaRuleType\TaxAreaRuleTypeDefinition;
+use Shopware\Core\System\Tax\Aggregate\TaxRuleType\TaxRuleTypeDefinition;
 use Shopware\Core\System\Tax\TaxDefinition;
 
-class TaxAreaRuleDefinition extends EntityDefinition
+class TaxRuleDefinition extends EntityDefinition
 {
-    public const ENTITY_NAME = 'tax_area_rule';
+    public const ENTITY_NAME = 'tax_rule';
 
     public function getEntityName(): string
     {
@@ -29,19 +29,19 @@ class TaxAreaRuleDefinition extends EntityDefinition
 
     public function getCollectionClass(): string
     {
-        return TaxAreaRuleCollection::class;
+        return TaxRuleCollection::class;
     }
 
     public function getEntityClass(): string
     {
-        return TaxAreaRuleEntity::class;
+        return TaxRuleEntity::class;
     }
 
     protected function defineFields(): FieldCollection
     {
         return new FieldCollection([
             (new IdField('id', 'id'))->addFlags(new PrimaryKey(), new Required()),
-            (new FkField('tax_area_rule_type_id', 'taxAreaRuleTypeId', TaxAreaRuleTypeDefinition::class))->addFlags(new Required()),
+            (new FkField('tax_rule_type_id', 'taxRuleTypeId', TaxRuleTypeDefinition::class))->addFlags(new Required()),
             (new FkField('country_id', 'countryId', CountryDefinition::class))->addFlags(new Required()),
             (new FloatField('tax_rate', 'taxRate'))->addFlags(new Required(), new SearchRanking(SearchRanking::HIGH_SEARCH_RANKING)),
             new JsonField('data', 'data', [
@@ -51,7 +51,7 @@ class TaxAreaRuleDefinition extends EntityDefinition
                 new StringField('toZipCode', 'toZipCode'),
             ]),
             (new FkField('tax_id', 'taxId', TaxDefinition::class))->addFlags(new Required()),
-            (new ManyToOneAssociationField('taxAreaRuleType', 'tax_area_rule_type_id', TaxAreaRuleTypeDefinition::class, 'id', true)),
+            (new ManyToOneAssociationField('type', 'tax_rule_type_id', TaxRuleTypeDefinition::class, 'id', true)),
             (new ManyToOneAssociationField('country', 'country_id', CountryDefinition::class, 'id')),
             new ManyToOneAssociationField('tax', 'tax_id', TaxDefinition::class, 'id'),
         ]);
