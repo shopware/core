@@ -83,7 +83,7 @@
         "symfony/messenger": "~4.4.13",
         "symfony/monolog-bundle": "3.5.0",
         "symfony/options-resolver": "~4.4.13",
-        "symfony/polyfill-php73": "1.13.1",
+        "symfony/polyfill-php73": "^1.18.0",
         "symfony/property-access": "~4.4.13",
         "symfony/property-info": "~4.4.13",
         "symfony/psr-http-message-bridge": "2.0.0",
