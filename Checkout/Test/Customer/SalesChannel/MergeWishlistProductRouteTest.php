@@ -14,7 +14,7 @@ use Shopware\Core\Framework\Util\Random;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 
-class MergeWishlistProductsRouteTest extends TestCase
+class MergeWishlistProductRouteTest extends TestCase
 {
     use IntegrationTestBehaviour;
     use CustomerTestTrait;
