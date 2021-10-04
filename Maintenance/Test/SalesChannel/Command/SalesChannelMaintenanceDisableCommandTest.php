@@ -1,35 +1,35 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\System\Test\SalesChannel\Command;
+namespace Shopware\Core\Maintenance\Test\SalesChannel\Command;
 
 use PHPUnit\Framework\TestCase;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
-use Shopware\Core\System\SalesChannel\Command\SalesChannelMaintenanceEnableCommand;
+use Shopware\Core\Maintenance\SalesChannel\Command\SalesChannelMaintenanceDisableCommand;
 use Shopware\Core\Test\TestDefaults;
 use Symfony\Component\Console\Tester\CommandTester;
 
-class SalesChannelMaintenanceEnableCommandTest extends TestCase
+class SalesChannelMaintenanceDisableCommandTest extends TestCase
 {
     use IntegrationTestBehaviour;
 
     public function testNoValidationErrors(): void
     {
-        $commandTester = new CommandTester($this->getContainer()->get(SalesChannelMaintenanceEnableCommand::class));
+        $commandTester = new CommandTester($this->getContainer()->get(SalesChannelMaintenanceDisableCommand::class));
         $commandTester->execute([]);
 
         static::assertEquals(
             0,
             $commandTester->getStatusCode(),
-            "\"bin/console sales-channel:maintenance:enable\" returned errors:\n" . $commandTester->getDisplay()
+            "\"bin/console sales-channel:maintenance:disable\" returned errors:\n" . $commandTester->getDisplay()
         );
     }
 
     public function testUnknownSalesChannelIds(): void
     {
-        $commandTester = new CommandTester($this->getContainer()->get(SalesChannelMaintenanceEnableCommand::class));
+        $commandTester = new CommandTester($this->getContainer()->get(SalesChannelMaintenanceDisableCommand::class));
         $commandTester->execute(['ids' => [\Shopware\Core\Framework\Uuid\Uuid::randomHex()]]);
 
         static::assertEquals(
@@ -40,7 +40,7 @@ class SalesChannelMaintenanceEnableCommandTest extends TestCase
 
     public function testNoSalesChannelIds(): void
     {
-        $commandTester = new CommandTester($this->getContainer()->get(SalesChannelMaintenanceEnableCommand::class));
+        $commandTester = new CommandTester($this->getContainer()->get(SalesChannelMaintenanceDisableCommand::class));
         $commandTester->execute([]);
 
         static::assertEquals(
@@ -51,7 +51,7 @@ class SalesChannelMaintenanceEnableCommandTest extends TestCase
 
     public function testOneSalesChannelIds(): void
     {
-        $commandTester = new CommandTester($this->getContainer()->get(SalesChannelMaintenanceEnableCommand::class));
+        $commandTester = new CommandTester($this->getContainer()->get(SalesChannelMaintenanceDisableCommand::class));
         $commandTester->execute(['ids' => [TestDefaults::SALES_CHANNEL]]);
 
         static::assertEquals(
@@ -66,7 +66,7 @@ class SalesChannelMaintenanceEnableCommandTest extends TestCase
         $salesChannelRepository = $this->getContainer()->get('sales_channel.repository');
         $count = $salesChannelRepository->search(new Criteria(), Context::createDefaultContext())->getTotal();
 
-        $commandTester = new CommandTester($this->getContainer()->get(SalesChannelMaintenanceEnableCommand::class));
+        $commandTester = new CommandTester($this->getContainer()->get(SalesChannelMaintenanceDisableCommand::class));
         $commandTester->execute(['--all' => true]);
 
         static::assertEquals(
