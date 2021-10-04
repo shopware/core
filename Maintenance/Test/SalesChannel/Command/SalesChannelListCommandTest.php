@@ -1,10 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\System\Test\SalesChannel\Command;
+namespace Shopware\Core\Maintenance\Test\SalesChannel\Command;
 
 use PHPUnit\Framework\TestCase;
 use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
-use Shopware\Core\System\SalesChannel\Command\SalesChannelListCommand;
+use Shopware\Core\Maintenance\SalesChannel\Command\SalesChannelListCommand;
 use Symfony\Component\Console\Tester\CommandTester;
 
 class SalesChannelListCommandTest extends TestCase

@@ -1,10 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\System\Test\User\Command;
+namespace Shopware\Core\Maintenance\Test\User\Command;
 
 use PHPUnit\Framework\TestCase;
 use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
-use Shopware\Core\System\User\Command\UserCreateCommand;
+use Shopware\Core\Maintenance\User\Command\UserCreateCommand;
 use Symfony\Component\Console\Tester\CommandTester;
 
 class UserCreateCommandTest extends TestCase
