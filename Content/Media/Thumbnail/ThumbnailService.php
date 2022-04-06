@@ -503,7 +503,6 @@ class ThumbnailService
     {
         return $media->getMediaType() instanceof ImageType
             && !$media->getMediaType()->is(ImageType::VECTOR_GRAPHIC)
-            && !$media->getMediaType()->is(ImageType::ANIMATED)
             && !$media->getMediaType()->is(ImageType::ICON);
     }
 
