@@ -1,42 +1,33 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Checkout\Document\FileGenerator;
+namespace Shopware\Core\Checkout\Document\Service;
 
 use Dompdf\Dompdf;
 use Dompdf\Options;
-use Shopware\Core\Checkout\Document\GeneratedDocument;
+use Shopware\Core\Checkout\Document\Renderer\RenderedDocument;
 
-/**
- * @deprecated tag:v6.5.0 - Will be removed, use PdfRenderer instead
- */
-class PdfGenerator implements FileGeneratorInterface
+class PdfRenderer
 {
     public const FILE_EXTENSION = 'pdf';
+
     public const FILE_CONTENT_TYPE = 'application/pdf';
-
-    public function supports(): string
-    {
-        return FileTypes::PDF;
-    }
-
-    public function getExtension(): string
-    {
-        return self::FILE_EXTENSION;
-    }
 
     public function getContentType(): string
     {
         return self::FILE_CONTENT_TYPE;
     }
 
-    public function generate(GeneratedDocument $generatedDocument): string
+    public function render(RenderedDocument $document): string
     {
+        $dompdf = new Dompdf();
+
         $options = new Options();
         $options->set('isRemoteEnabled', true);
         $options->setIsHtml5ParserEnabled(true);
-        $dompdf = new Dompdf($options);
-        $dompdf->setPaper($generatedDocument->getPageSize(), $generatedDocument->getPageOrientation());
-        $dompdf->loadHtml($generatedDocument->getHtml());
+
+        $dompdf->setOptions($options);
+        $dompdf->setPaper($document->getPageSize(), $document->getPageOrientation());
+        $dompdf->loadHtml($document->getHtml());
 
         /*
          * Dompdf creates and destroys a lot of objects. The garbage collector slows the process down by ~50% for
@@ -54,6 +45,6 @@ class PdfGenerator implements FileGeneratorInterface
             gc_enable();
         }
 
-        return $dompdf->output();
+        return $dompdf->output() ?? '';
     }
 }
