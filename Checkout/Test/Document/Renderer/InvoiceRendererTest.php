@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Checkout\Test\Document\DocumentType;
+namespace Shopware\Core\Checkout\Test\Document\Renderer;
 
 use Doctrine\DBAL\Connection;
 use PHPUnit\Framework\TestCase;
@@ -11,12 +11,12 @@ use Shopware\Core\Checkout\Cart\Exception\InvalidQuantityException;
 use Shopware\Core\Checkout\Cart\Exception\MixedLineItemTypeException;
 use Shopware\Core\Checkout\Cart\Order\OrderPersister;
 use Shopware\Core\Checkout\Cart\Processor;
-use Shopware\Core\Checkout\Document\DocumentConfiguration;
-use Shopware\Core\Checkout\Document\DocumentConfigurationFactory;
-use Shopware\Core\Checkout\Document\DocumentGenerator\InvoiceGenerator;
-use Shopware\Core\Checkout\Document\DocumentGenerator\StornoGenerator;
-use Shopware\Core\Checkout\Document\FileGenerator\PdfGenerator;
-use Shopware\Core\Checkout\Document\GeneratedDocument;
+use Shopware\Core\Checkout\Document\Event\DocumentGeneratorCriteriaEvent;
+use Shopware\Core\Checkout\Document\FileGenerator\FileTypes;
+use Shopware\Core\Checkout\Document\Renderer\InvoiceRenderer;
+use Shopware\Core\Checkout\Document\Renderer\RenderedDocument;
+use Shopware\Core\Checkout\Document\Service\PdfRenderer;
+use Shopware\Core\Checkout\Document\Struct\DocumentGenerateOperation;
 use Shopware\Core\Checkout\Order\OrderEntity;
 use Shopware\Core\Checkout\Test\Cart\Common\TrueRule;
 use Shopware\Core\Checkout\Test\Payment\Handler\V630\SyncTestPaymentHandler;
@@ -40,34 +40,19 @@ use Shopware\Core\System\SalesChannel\Context\SalesChannelContextService;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Shopware\Core\Test\TestDefaults;
 
-/**
- * @deprecated tag:v6.5.0 - Will be removed
- */
-class InvoiceServiceTest extends TestCase
+class InvoiceRendererTest extends TestCase
 {
     use IntegrationTestBehaviour;
     use TaxAddToSalesChannelTestBehaviour;
     use CountryAddToSalesChannelTestBehaviour;
 
-    /**
-     * @var SalesChannelContext
-     */
-    private $salesChannelContext;
+    private SalesChannelContext $salesChannelContext;
 
-    /**
-     * @var Context
-     */
-    private $context;
+    private Context $context;
 
-    /**
-     * @var Connection|object
-     */
-    private $connection;
+    private Connection $connection;
 
-    /**
-     * @var CurrencyFormatter
-     */
-    private $currencyFormatter;
+    private CurrencyFormatter $currencyFormatter;
 
     protected function setUp(): void
     {
@@ -97,10 +82,10 @@ class InvoiceServiceTest extends TestCase
         $this->salesChannelContext->setRuleIds([$priceRuleId]);
     }
 
-    public function testGenerateWithDifferentTaxes(): void
+    public function testRenderWithDifferentTaxes(): void
     {
-        $invoiceService = $this->getContainer()->get(InvoiceGenerator::class);
-        $pdfGenerator = $this->getContainer()->get(PdfGenerator::class);
+        $invoiceRenderer = $this->getContainer()->get(InvoiceRenderer::class);
+        $pdfGenerator = $this->getContainer()->get(PdfRenderer::class);
 
         $possibleTaxes = [7, 19, 22];
         //generates one line item for each tax
@@ -109,136 +94,84 @@ class InvoiceServiceTest extends TestCase
         /** @var OrderEntity $order */
         $order = $this->getOrderById($orderId);
 
-        $documentConfiguration = DocumentConfigurationFactory::mergeConfiguration(
-            new DocumentConfiguration(),
-            [
-                'displayLineItems' => true,
-                'itemsPerPage' => 10,
-                'displayFooter' => true,
-                'displayHeader' => true,
-            ]
-        );
-        $context = Context::createDefaultContext();
+        $operationInvoice = new DocumentGenerateOperation($orderId);
 
-        $processedTemplate = $invoiceService->generate(
-            $order,
-            $documentConfiguration,
-            $context
+        $caughtEvent = null;
+
+        $this->getContainer()->get('event_dispatcher')
+            ->addListener(DocumentGeneratorCriteriaEvent::class, function (DocumentGeneratorCriteriaEvent $event) use (&$caughtEvent): void {
+                $caughtEvent = $event;
+            });
+
+        $processedTemplate = $invoiceRenderer->render(
+            [$order->getId() => $operationInvoice],
+            $this->context
         );
 
-        static::assertStringContainsString('<html>', $processedTemplate);
-        static::assertStringContainsString('</html>', $processedTemplate);
-        static::assertStringContainsString($order->getLineItems()->first()->getLabel(), $processedTemplate);
-        static::assertStringContainsString($order->getLineItems()->last()->getLabel(), $processedTemplate);
+        static::assertInstanceOf(DocumentGeneratorCriteriaEvent::class, $caughtEvent);
+        static::assertEquals($caughtEvent->getDocumentType(), 'invoice');
+        static::assertCount(1, $caughtEvent->getOperations());
+
+        static::assertInstanceOf(RenderedDocument::class, $processedTemplate[$orderId]);
+
+        $rendered = $processedTemplate[$orderId];
+
+        static::assertStringContainsString('<html>', $rendered->getHtml());
+        static::assertStringContainsString('</html>', $rendered->getHtml());
+        static::assertStringContainsString($order->getLineItems()->first()->getLabel(), $rendered->getHtml());
+        static::assertStringContainsString($order->getLineItems()->last()->getLabel(), $rendered->getHtml());
         static::assertStringContainsString(
             $this->currencyFormatter->formatCurrencyByLanguage(
                 $order->getAmountTotal(),
                 $order->getCurrency()->getIsoCode(),
-                $context->getLanguageId(),
-                $context
+                $this->context->getLanguageId(),
+                $this->context
             ),
-            $processedTemplate
+            $rendered->getHtml()
         );
         foreach ($possibleTaxes as $possibleTax) {
             static::assertStringContainsString(
                 sprintf('plus %d%% VAT', $possibleTax),
-                $processedTemplate
+                $rendered->getHtml()
             );
         }
 
-        $generatedDocument = new GeneratedDocument();
-        $generatedDocument->setHtml($processedTemplate);
-
-        $generatorOutput = $pdfGenerator->generate($generatedDocument);
+        $generatorOutput = $pdfGenerator->render($rendered);
         static::assertNotEmpty($generatorOutput);
 
         $finfo = new \finfo(\FILEINFO_MIME_TYPE);
         static::assertEquals('application/pdf', $finfo->buffer($generatorOutput));
 
         $deLanguageId = $this->getDeDeLanguageId();
-        $order->setLanguageId($deLanguageId);
 
-        $processedTemplate = $invoiceService->generate(
-            $order,
-            $documentConfiguration,
-            $context
+        $this->getContainer()->get('order.repository')->upsert([[
+            'id' => $order->getId(),
+            'languageId' => $deLanguageId,
+        ]], $this->context);
+
+        $processedTemplate = $invoiceRenderer->render(
+            [$orderId => $operationInvoice],
+            $this->context
         );
+
+        static::assertInstanceOf(RenderedDocument::class, $processedTemplate[$orderId]);
+
+        $rendered = $processedTemplate[$orderId];
 
         static::assertStringContainsString(
             preg_replace('/\xc2\xa0/', ' ', $this->currencyFormatter->formatCurrencyByLanguage(
                 $order->getAmountTotal(),
                 $order->getCurrency()->getIsoCode(),
                 $deLanguageId,
-                $context
+                $this->context
             )),
-            preg_replace('/\xc2\xa0/', ' ', $processedTemplate)
+            preg_replace('/\xc2\xa0/', ' ', $rendered->getHtml())
         );
     }
 
-    public function testGenerateStornoWithDifferentTaxes(): void
+    public function testRenderWithShippingAddress(): void
     {
-        $stornoGenerator = $this->getContainer()->get(StornoGenerator::class);
-        $pdfGenerator = $this->getContainer()->get(PdfGenerator::class);
-
-        $possibleTaxes = [7, 19, 22];
-        //generates one line item for each tax
-        $cart = $this->generateDemoCart($possibleTaxes);
-        $orderId = $this->persistCart($cart);
-        /** @var OrderEntity $order */
-        $order = $this->getOrderById($orderId);
-
-        $documentConfiguration = DocumentConfigurationFactory::mergeConfiguration(
-            new DocumentConfiguration(),
-            [
-                'displayLineItems' => true,
-                'itemsPerPage' => 10,
-                'displayFooter' => true,
-                'displayHeader' => true,
-            ]
-        );
-        $context = Context::createDefaultContext();
-
-        $processedTemplate = $stornoGenerator->generate(
-            $order,
-            $documentConfiguration,
-            $context
-        );
-
-        static::assertLessThanOrEqual(0, $order->getPrice()->getTotalPrice());
-        static::assertLessThanOrEqual(0, $order->getPrice()->getRawTotal());
-        static::assertStringContainsString('<html>', $processedTemplate);
-        static::assertStringContainsString('</html>', $processedTemplate);
-        static::assertStringContainsString($order->getLineItems()->first()->getLabel(), $processedTemplate);
-        static::assertStringContainsString($order->getLineItems()->last()->getLabel(), $processedTemplate);
-        static::assertStringContainsString(
-            $this->currencyFormatter->formatCurrencyByLanguage(
-                $order->getAmountTotal(),
-                $order->getCurrency()->getIsoCode(),
-                $context->getLanguageId(),
-                $context
-            ),
-            $processedTemplate
-        );
-        foreach ($possibleTaxes as $possibleTax) {
-            static::assertStringContainsString(
-                sprintf('plus %d%% VAT', $possibleTax),
-                $processedTemplate
-            );
-        }
-
-        $generatedDocument = new GeneratedDocument();
-        $generatedDocument->setHtml($processedTemplate);
-
-        $generatorOutput = $pdfGenerator->generate($generatedDocument);
-        static::assertNotEmpty($generatorOutput);
-
-        $finfo = new \finfo(\FILEINFO_MIME_TYPE);
-        static::assertEquals('application/pdf', $finfo->buffer($generatorOutput));
-    }
-
-    public function testGenerateWithShippingAddress(): void
-    {
-        $invoiceService = $this->getContainer()->get(InvoiceGenerator::class);
+        $invoiceRenderer = $this->getContainer()->get(InvoiceRenderer::class);
 
         $possibleTaxes = [7, 19, 22];
         //generates one line item for each tax
@@ -248,45 +181,53 @@ class InvoiceServiceTest extends TestCase
         $order = $this->getOrderById($orderId);
         $country = $order->getDeliveries()->getShippingAddress()->getCountries()->first();
         $country->setCompanyTax(new TaxFreeConfig(true, Defaults::CURRENCY, 0));
+
+        $this->getContainer()->get('country.repository')->update([[
+            'id' => $country->getId(),
+            'companyTax' => ['enabled' => true, 'currencyId' => Defaults::CURRENCY, 'amount' => 0],
+        ]], $this->context);
         $companyPhone = '123123123';
         $vatIds = ['VAT-123123'];
         $order->getOrderCustomer()->setVatIds($vatIds);
 
-        $documentConfiguration = DocumentConfigurationFactory::mergeConfiguration(
-            new DocumentConfiguration(),
-            [
-                'displayLineItems' => true,
-                'itemsPerPage' => 10,
-                'displayFooter' => true,
-                'displayHeader' => true,
-                'executiveDirector' => true,
-                'displayDivergentDeliveryAddress' => true,
-                'companyPhone' => $companyPhone,
-                'intraCommunityDelivery' => true,
-                'displayAdditionalNoteDelivery' => true,
-                'deliveryCountries' => [$country->getId()],
-            ]
-        );
+        $this->getContainer()->get('order_customer.repository')->update([[
+            'id' => $order->getOrderCustomer()->getId(),
+            'vatIds' => $vatIds,
+        ]], $this->context);
 
-        $context = Context::createDefaultContext();
+        $operation = new DocumentGenerateOperation($orderId, FileTypes::PDF, [
+            'displayLineItems' => true,
+            'itemsPerPage' => 10,
+            'displayFooter' => true,
+            'displayHeader' => true,
+            'executiveDirector' => true,
+            'displayDivergentDeliveryAddress' => true,
+            'companyPhone' => $companyPhone,
+            'intraCommunityDelivery' => true,
+            'displayAdditionalNoteDelivery' => true,
+            'deliveryCountries' => [$country->getId()],
+        ]);
 
-        $processedTemplate = $invoiceService->generate(
-            $order,
-            $documentConfiguration,
-            $context
+        $processedTemplate = $invoiceRenderer->render(
+            [$orderId => $operation],
+            $this->context
         );
 
         $shippingAddress = $order->getDeliveries()->getShippingAddress()->first();
 
-        static::assertStringContainsString('Shipping address', $processedTemplate);
-        static::assertStringContainsString($shippingAddress->getStreet(), $processedTemplate);
-        static::assertStringContainsString($shippingAddress->getCity(), $processedTemplate);
-        static::assertStringContainsString($shippingAddress->getFirstName(), $processedTemplate);
-        static::assertStringContainsString($shippingAddress->getLastName(), $processedTemplate);
-        static::assertStringContainsString($shippingAddress->getZipcode(), $processedTemplate);
-        static::assertStringContainsString('Intra-community delivery (EU)', $processedTemplate);
-        static::assertStringContainsString($vatIds[0], $processedTemplate);
-        static::assertStringContainsString($companyPhone, $processedTemplate);
+        static::assertInstanceOf(RenderedDocument::class, $processedTemplate[$orderId]);
+
+        $rendered = $processedTemplate[$orderId]->getHtml();
+
+        static::assertStringContainsString('Shipping address', $rendered);
+        static::assertStringContainsString($shippingAddress->getStreet(), $rendered);
+        static::assertStringContainsString($shippingAddress->getCity(), $rendered);
+        static::assertStringContainsString($shippingAddress->getFirstName(), $rendered);
+        static::assertStringContainsString($shippingAddress->getLastName(), $rendered);
+        static::assertStringContainsString($shippingAddress->getZipcode(), $rendered);
+        static::assertStringContainsString('Intra-community delivery (EU)', $rendered);
+        static::assertStringContainsString($vatIds[0], $rendered);
+        static::assertStringContainsString($companyPhone, $rendered);
     }
 
     /**
