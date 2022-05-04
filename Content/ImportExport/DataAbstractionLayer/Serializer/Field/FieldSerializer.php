@@ -71,7 +71,7 @@ class FieldSerializer extends AbstractFieldSerializer
 
             yield $key => (string) $value;
         } elseif ($field instanceof BoolField) {
-            yield $key => $value === true ? '1' : '0';
+            yield $key => $value === true ? '1' : ($value === null ? null : '0');
         } elseif ($field instanceof JsonField) {
             yield $key => $value === null ? null : json_encode($value);
         } else {
