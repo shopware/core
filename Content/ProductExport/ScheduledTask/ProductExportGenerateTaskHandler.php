@@ -65,7 +65,6 @@ class ProductExportGenerateTaskHandler extends ScheduledTaskHandler
     {
         $criteria = new Criteria();
         $criteria
-            ->addFilter(new EqualsFilter('typeId', Defaults::SALES_CHANNEL_TYPE_STOREFRONT))
             ->addFilter(new EqualsFilter('active', true));
 
         $salesChannelIds = $this->salesChannelRepository->searchIds($criteria, Context::createDefaultContext());
