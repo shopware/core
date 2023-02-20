@@ -780,7 +780,7 @@ class ApiController extends AbstractController
             $eventIds = $event->getIds();
             $entityId = array_pop($eventIds);
 
-            if ($definition instanceof MappingEntityDefinition) {
+            if ($definition instanceof MappingEntityDefinition || $definition instanceof EntityTranslationDefinition) {
                 return new Response(null, Response::HTTP_NO_CONTENT);
             }
 
