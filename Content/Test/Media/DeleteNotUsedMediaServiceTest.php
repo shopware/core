@@ -8,10 +8,13 @@ use Shopware\Core\Content\Media\Pathname\UrlGeneratorInterface;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\Framework\Feature;
 use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
 use Shopware\Core\Framework\Test\TestCaseBase\QueueTestBehaviour;
 
 /**
+ * @deprecated tag:v6.6.0 - Will be removed with \Shopware\Core\Content\Media\DeleteNotUsedMediaService
+ *
  * @internal
  */
 class DeleteNotUsedMediaServiceTest extends TestCase
@@ -30,6 +33,8 @@ class DeleteNotUsedMediaServiceTest extends TestCase
 
     protected function setUp(): void
     {
+        Feature::skipTestIfActive('v6.6.0.0', $this);
+
         $this->mediaRepo = $this->getContainer()->get('media.repository');
 
         $this->context = Context::createDefaultContext();
