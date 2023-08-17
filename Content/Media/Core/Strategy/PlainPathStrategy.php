@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Content\Media\Core\Path\Strategy;
+namespace Shopware\Core\Content\Media\Core\Strategy;
 
-use Shopware\Core\Content\Media\Domain\Path\AbstractMediaPathStrategy;
+use Shopware\Core\Content\Media\Core\Application\AbstractMediaPathStrategy;
 use Shopware\Core\Framework\Log\Package;
 
 /**

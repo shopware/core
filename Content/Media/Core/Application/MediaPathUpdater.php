@@ -1,9 +1,7 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Content\Media\Domain\Path;
+namespace Shopware\Core\Content\Media\Core\Application;
 
-use Shopware\Core\Content\Media\Core\Path\MediaLocationBuilder;
-use Shopware\Core\Content\Media\Core\Path\MediaPathStorage;
 use Shopware\Core\Framework\Log\Package;
 
 /**

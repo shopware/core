@@ -1,7 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Content\Media\Domain\Path;
+namespace Shopware\Core\Content\Media\Core\Application;
 
+use Shopware\Core\Content\Media\Core\Params\UrlParams;
 use Shopware\Core\Content\Media\MediaEntity;
 use Shopware\Core\Content\Media\Pathname\UrlGeneratorInterface;
 use Shopware\Core\Framework\DataAbstractionLayer\Entity;
@@ -36,7 +37,7 @@ class MediaUrlLoader
      */
     public function loaded(iterable $entities): void
     {
-        if (!Feature::isActive('v6.6.0.0')) {
+        if (!self::newBehavior()) {
             return;
         }
 
@@ -49,7 +50,7 @@ class MediaUrlLoader
         $urls = $this->generator->generate($mapping);
 
         foreach ($entities as $entity) {
-            if (!isset($mapping[$entity->getUniqueIdentifier()])) {
+            if (!isset($urls[$entity->getUniqueIdentifier()])) {
                 continue;
             }
 
@@ -61,7 +62,7 @@ class MediaUrlLoader
 
             /** @var Entity $thumbnail */
             foreach ($entity->get('thumbnails') as $thumbnail) {
-                if (!isset($mapping[$thumbnail->getUniqueIdentifier()])) {
+                if (!isset($urls[$thumbnail->getUniqueIdentifier()])) {
                     continue;
                 }
 
@@ -77,16 +78,12 @@ class MediaUrlLoader
      */
     public function legacyPath(iterable $entities): void
     {
-        if (Feature::isActive('v6.6.0.0')) {
+        if (self::newBehavior()) {
             return;
         }
 
         foreach ($entities as $media) {
             if (!$media->hasFile() || $media->isPrivate()) {
-                continue;
-            }
-
-            if (!empty($media->getPath())) {
                 continue;
             }
 
@@ -115,7 +112,7 @@ class MediaUrlLoader
      */
     public function legacy(iterable $entities): void
     {
-        if (Feature::isActive('v6.6.0.0')) {
+        if (self::newBehavior()) {
             return;
         }
 
@@ -149,10 +146,15 @@ class MediaUrlLoader
         }
     }
 
+    private static function newBehavior(): bool
+    {
+        return Feature::isActive('v6.6.0.0') || Feature::isActive('media_path');
+    }
+
     /**
      * @param iterable<Entity> $entities
      *
-     * @return array<string, array{path:string, updatedAt:\DateTimeImmutable|null}>
+     * @return array<string, UrlParams>
      */
     private function map(iterable $entities): array
     {
@@ -167,10 +169,7 @@ class MediaUrlLoader
                 continue;
             }
 
-            $mapped[$entity->getUniqueIdentifier()] = [
-                'path' => (string) $entity->get('path'),
-                'updatedAt' => $entity->get('updatedAt'),
-            ];
+            $mapped[$entity->getUniqueIdentifier()] = UrlParams::fromMedia($entity);
 
             if (!$entity->has('thumbnails')) {
                 continue;
@@ -183,10 +182,7 @@ class MediaUrlLoader
                     continue;
                 }
 
-                $mapped[$thumbnail->getUniqueIdentifier()] = [
-                    'path' => (string) $thumbnail->get('path'),
-                    'updatedAt' => $entity->get('updatedAt'),
-                ];
+                $mapped[$thumbnail->getUniqueIdentifier()] = UrlParams::fromThumbnail($thumbnail);
             }
         }
 

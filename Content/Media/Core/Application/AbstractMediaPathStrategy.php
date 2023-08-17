@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Content\Media\Domain\Path;
+namespace Shopware\Core\Content\Media\Core\Application;
 
-use Shopware\Core\Content\Media\Domain\Path\Struct\MediaLocationStruct;
-use Shopware\Core\Content\Media\Domain\Path\Struct\ThumbnailLocationStruct;
+use Shopware\Core\Content\Media\Core\Params\MediaLocationStruct;
+use Shopware\Core\Content\Media\Core\Params\ThumbnailLocationStruct;
 use Shopware\Core\Framework\Log\Package;
 
 /**
@@ -78,7 +78,7 @@ abstract class AbstractMediaPathStrategy
 
         $slices = \array_slice(str_split($hash, 2), 0, 3);
         $slices = array_map(
-            fn ($slice) => \array_key_exists($slice, $this->blacklist()) ? $this->blacklist()[$slice] : $slice,
+            fn ($slice) => \array_key_exists($slice, $this->replaceCharacters()) ? $this->replaceCharacters()[$slice] : $slice,
             $slices
         );
 
@@ -94,11 +94,11 @@ abstract class AbstractMediaPathStrategy
     }
 
     /**
-     * `blacklist` allows to define a list of characters which should be replaced by a replacement character.
+     * `replaceCharacters` allows to define a list of characters which should be replaced by a replacement character.
      *
      * @return array<string, string>
      */
-    protected function blacklist(): array
+    protected function replaceCharacters(): array
     {
         return [];
     }

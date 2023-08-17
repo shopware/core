@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Content\Media\Core\Path;
+namespace Shopware\Core\Content\Media\Core\Application;
 
 use Shopware\Core\Framework\Log\Package;
 

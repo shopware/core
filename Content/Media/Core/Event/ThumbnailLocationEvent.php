@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Content\Media\Domain\Event;
+namespace Shopware\Core\Content\Media\Core\Event;
 
-use Shopware\Core\Content\Media\Domain\Path\Struct\ThumbnailLocationStruct;
+use Shopware\Core\Content\Media\Core\Params\ThumbnailLocationStruct;
 use Shopware\Core\Framework\Log\Package;
 
 /**

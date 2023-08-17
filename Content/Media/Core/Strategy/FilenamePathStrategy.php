@@ -1,10 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Content\Media\Core\Path\Strategy;
+namespace Shopware\Core\Content\Media\Core\Strategy;
 
-use Shopware\Core\Content\Media\Domain\Path\AbstractMediaPathStrategy;
-use Shopware\Core\Content\Media\Domain\Path\Struct\MediaLocationStruct;
-use Shopware\Core\Content\Media\Domain\Path\Struct\ThumbnailLocationStruct;
+use Shopware\Core\Content\Media\Core\Application\AbstractMediaPathStrategy;
+use Shopware\Core\Content\Media\Core\Params\MediaLocationStruct;
+use Shopware\Core\Content\Media\Core\Params\ThumbnailLocationStruct;
 use Shopware\Core\Framework\Log\Package;
 
 /**
@@ -23,7 +23,7 @@ class FilenamePathStrategy extends AbstractMediaPathStrategy
         return $location instanceof ThumbnailLocationStruct ? $location->media->fileName : $location->fileName;
     }
 
-    protected function blacklist(): array
+    protected function replaceCharacters(): array
     {
         return ['ad' => 'g0'];
     }
