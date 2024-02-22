@@ -19,6 +19,6 @@ class Migration%%timestamp%%%%name%% extends MigrationStep
 
     public function update(Connection $connection): void
     {
-        // implement update
+
     }
 }
