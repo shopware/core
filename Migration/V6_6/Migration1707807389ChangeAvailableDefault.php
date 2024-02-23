@@ -10,15 +10,15 @@ use Shopware\Core\Framework\Migration\MigrationStep;
  * @internal
  */
 #[Package('core')]
-class Migration1702982372FixProductCrossSellingSortByPrice extends MigrationStep
+class Migration1707807389ChangeAvailableDefault extends MigrationStep
 {
     public function getCreationTimestamp(): int
     {
-        return 1702982372;
+        return 1707807389;
     }
 
     public function update(Connection $connection): void
     {
-        $connection->executeStatement('UPDATE product_cross_selling SET sort_by = "cheapestPrice" WHERE sort_by = "price"');
+        $connection->executeStatement('ALTER TABLE `product` CHANGE `available` `available` tinyint(1) NOT NULL DEFAULT \'0\';');
     }
 }
