@@ -36,6 +36,9 @@ class FkField extends Field implements StorageAware
 
     private ?string $referenceEntity = null;
 
+    /**
+     * @param class-string<\Shopware\Core\Framework\DataAbstractionLayer\EntityDefinition> $referenceClass
+     */
     public function __construct(
         string $storageName,
         string $propertyName,
