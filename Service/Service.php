@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Services;
+namespace Shopware\Core\Service;
 
 use Shopware\Core\Framework\Bundle;
 use Shopware\Core\Framework\Log\Package;
@@ -14,7 +14,7 @@ use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
  * @codeCoverageIgnore
  */
 #[Package('core')]
-class Services extends Bundle
+class Service extends Bundle
 {
     /**
      * {@inheritdoc}

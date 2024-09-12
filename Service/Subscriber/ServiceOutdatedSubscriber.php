@@ -1,10 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Services\Subscriber;
+namespace Shopware\Core\Service\Subscriber;
 
 use Shopware\Core\Framework\Log\Package;
-use Shopware\Core\Services\Event\ServiceOutdatedEvent;
-use Shopware\Core\Services\ServiceLifecycle;
+use Shopware\Core\Service\Event\ServiceOutdatedEvent;
+use Shopware\Core\Service\ServiceLifecycle;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**

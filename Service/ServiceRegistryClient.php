@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Services;
+namespace Shopware\Core\Service;
 
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
@@ -31,7 +31,7 @@ class ServiceRegistryClient
             }
         }
 
-        throw ServicesException::notFound('name', $name);
+        throw ServiceException::notFound('name', $name);
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Services;
+namespace Shopware\Core\Service;
 
 use Shopware\Core\Framework\Log\Package;
 
@@ -25,7 +25,7 @@ readonly class AppInfo
     public static function fromNameAndArray(string $appName, array $appInfo): self
     {
         if (!isset($appInfo['app-version']) || !isset($appInfo['app-hash']) || !isset($appInfo['app-revision']) || !isset($appInfo['app-zip-url'])) {
-            throw ServicesException::missingAppVersionInfo();
+            throw ServiceException::missingAppVersionInfo();
         }
 
         return new AppInfo(

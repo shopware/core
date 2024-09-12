@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Services;
+namespace Shopware\Core\Service;
 
 use Psr\Log\LoggerInterface;
 use Shopware\Core\Framework\App\AppCollection;
@@ -41,7 +41,7 @@ class ServiceLifecycle
     {
         try {
             $appInfo = $this->serviceClientFactory->newFor($serviceEntry)->latestAppInfo();
-        } catch (ServicesException $e) {
+        } catch (ServiceException $e) {
             $this->logger->error(\sprintf('Cannot install service "%s" because of error: "%s"', $serviceEntry->name, $e->getMessage()));
 
             return false;
@@ -76,12 +76,12 @@ class ServiceLifecycle
         $app = $this->loadServiceByName($serviceName, $context);
 
         if (!$app) {
-            throw ServicesException::notFound('name', $serviceName);
+            throw ServiceException::notFound('name', $serviceName);
         }
 
         try {
             $latestAppInfo = $this->serviceClientFactory->newFor($serviceEntry)->latestAppInfo();
-        } catch (ServicesException $e) {
+        } catch (ServiceException $e) {
             $this->logger->error(\sprintf('Cannot update service "%s" because of error: "%s"', $serviceEntry->name, $e->getMessage()));
 
             return false;

@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Services;
+namespace Shopware\Core\Service;
 
 use Shopware\Core\Framework\Api\Context\AdminApiSource;
 use Shopware\Core\Framework\Api\Context\ContextSource;
@@ -9,7 +9,7 @@ use Shopware\Core\Framework\Log\Package;
 use Symfony\Component\HttpFoundation\Response;
 
 #[Package('core')]
-class ServicesException extends HttpException
+class ServiceException extends HttpException
 {
     public const NOT_FOUND = 'SERVICE__NOT_FOUND';
     public const INTEGRATION_NOT_ALLOWED_TO_UPDATE_SERVICE = 'SERVICE__INTEGRATION_NOT_ALLOWED_TO_UPDATE_SERVICE';

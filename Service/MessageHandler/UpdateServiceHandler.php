@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Services\MessageHandler;
+namespace Shopware\Core\Service\MessageHandler;
 
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\Log\Package;
-use Shopware\Core\Services\Message\UpdateServiceMessage;
-use Shopware\Core\Services\ServiceLifecycle;
+use Shopware\Core\Service\Message\UpdateServiceMessage;
+use Shopware\Core\Service\ServiceLifecycle;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**

@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Services;
+namespace Shopware\Core\Service;
 
 use Shopware\Core\Framework\Log\Package;
 use Symfony\Component\Filesystem\Exception\IOException;
@@ -56,10 +56,10 @@ class ServiceClient
     {
         try {
             if ($response->getStatusCode() !== 200) {
-                throw ServicesException::requestFailed($response->getStatusCode());
+                throw ServiceException::requestFailed($response->getStatusCode());
             }
         } catch (TransportExceptionInterface $exception) {
-            throw ServicesException::requestTransportError($exception);
+            throw ServiceException::requestTransportError($exception);
         }
     }
 
@@ -76,7 +76,7 @@ class ServiceClient
             try {
                 $this->filesystem->appendToFile($destination, $chunk->getContent());
             } catch (IOException $e) {
-                throw ServicesException::cannotWriteAppToDestination($destination);
+                throw ServiceException::cannotWriteAppToDestination($destination);
             }
         }
 

@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Services\Api;
+namespace Shopware\Core\Service\Api;
 
 use Shopware\Core\Framework\Api\Context\AdminApiSource;
 use Shopware\Core\Framework\App\AppCollection;
@@ -11,8 +11,8 @@ use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\Log\Package;
-use Shopware\Core\Services\Message\UpdateServiceMessage;
-use Shopware\Core\Services\ServicesException;
+use Shopware\Core\Service\Message\UpdateServiceMessage;
+use Shopware\Core\Service\ServiceException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -40,18 +40,18 @@ class ServiceController
     {
         $source = $context->getSource();
         if (!$source instanceof AdminApiSource) {
-            throw ServicesException::updateRequiresAdminApiSource($source);
+            throw ServiceException::updateRequiresAdminApiSource($source);
         }
 
         $integrationId = $source->getIntegrationId();
         if (!$integrationId) {
-            throw ServicesException::updateRequiresIntegration();
+            throw ServiceException::updateRequiresIntegration();
         }
 
         $app = $this->loadService($context);
 
         if (!$app) {
-            throw ServicesException::notFound('integrationId', $integrationId);
+            throw ServiceException::notFound('integrationId', $integrationId);
         }
 
         $this->messageBus->dispatch(new UpdateServiceMessage($app->getName()));
@@ -64,22 +64,22 @@ class ServiceController
     {
         $source = $context->getSource();
         if (!$source instanceof AdminApiSource) {
-            throw ServicesException::updateRequiresAdminApiSource($source);
+            throw ServiceException::updateRequiresAdminApiSource($source);
         }
 
         $integrationId = $source->getIntegrationId();
         if (!$integrationId) {
-            throw ServicesException::updateRequiresIntegration();
+            throw ServiceException::updateRequiresIntegration();
         }
 
         $service = $this->loadServiceByName($serviceName, $context);
 
         if (!$service) {
-            throw ServicesException::notFound('name', $serviceName);
+            throw ServiceException::notFound('name', $serviceName);
         }
 
         if ($service->getIntegrationId() === $integrationId) {
-            throw ServicesException::toggleActionNotAllowed();
+            throw ServiceException::toggleActionNotAllowed();
         }
 
         if (!$service->isActive()) {
@@ -96,22 +96,22 @@ class ServiceController
     {
         $source = $context->getSource();
         if (!$source instanceof AdminApiSource) {
-            throw ServicesException::updateRequiresAdminApiSource($source);
+            throw ServiceException::updateRequiresAdminApiSource($source);
         }
 
         $integrationId = $source->getIntegrationId();
         if (!$integrationId) {
-            throw ServicesException::updateRequiresIntegration();
+            throw ServiceException::updateRequiresIntegration();
         }
 
         $service = $this->loadServiceByName($serviceName, $context);
 
         if (!$service) {
-            throw ServicesException::notFound('name', $serviceName);
+            throw ServiceException::notFound('name', $serviceName);
         }
 
         if ($service->getIntegrationId() === $integrationId) {
-            throw ServicesException::toggleActionNotAllowed();
+            throw ServiceException::toggleActionNotAllowed();
         }
 
         if ($service->isActive()) {

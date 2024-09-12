@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Services;
+namespace Shopware\Core\Service;
 
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Shopware\Core\Framework\App\AppEntity;
@@ -14,7 +14,7 @@ use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Plugin\PluginException;
 use Shopware\Core\Framework\Util\Filesystem;
-use Shopware\Core\Services\Event\ServiceOutdatedEvent;
+use Shopware\Core\Service\Event\ServiceOutdatedEvent;
 use Symfony\Component\Filesystem\Filesystem as Io;
 use Symfony\Component\Filesystem\Path;
 
@@ -107,7 +107,7 @@ class ServiceSourceResolver implements Source
 
         try {
             $client->downloadAppZipForVersion($zipUrl, $localZipLocation);
-        } catch (ServicesException $e) {
+        } catch (ServiceException $e) {
             throw AppException::cannotMountAppFilesystem($serviceName, $e); // @phpstan-ignore shopware.domainException
         }
 
