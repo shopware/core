@@ -3,22 +3,22 @@
 namespace Shopware\Core\Framework\Telemetry\Metrics\Exception;
 
 use Shopware\Core\Framework\Log\Package;
-use Shopware\Core\Framework\Telemetry\Metrics\Attribute\MetricAttributeInterface;
 use Shopware\Core\Framework\Telemetry\TelemetryException;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @internal
+ *
+ * @codeCoverageIgnore
  */
 #[Package('core')]
-class InvalidMetricValueException extends TelemetryException
+class MissingMetricConfigurationException extends TelemetryException
 {
-    final public const METRIC_INVALID_ATTRIBUTE_VALUE = 'TELEMETRY__INVALID_METRIC_VALUE';
+    final public const METRIC_MISSING_CONFIGURATION = 'TELEMETRY__MISSING_METRIC_CONFIGURATION';
 
     public function __construct(
-        public readonly MetricAttributeInterface $attribute,
-        public readonly mixed $value,
-        public string $errorCode = self::METRIC_INVALID_ATTRIBUTE_VALUE,
+        public readonly string $metric,
+        public string $errorCode = self::METRIC_MISSING_CONFIGURATION,
         string $message = '',
         ?\Throwable $previous = null
     ) {
@@ -27,6 +27,6 @@ class InvalidMetricValueException extends TelemetryException
 
     public function getErrorCode(): string
     {
-        return self::METRIC_INVALID_ATTRIBUTE_VALUE;
+        return self::METRIC_MISSING_CONFIGURATION;
     }
 }

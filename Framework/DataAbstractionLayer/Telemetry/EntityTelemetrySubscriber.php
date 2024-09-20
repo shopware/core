@@ -1,19 +1,19 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Framework\DataAbstractionLayer\Subscriber;
+namespace Shopware\Core\Framework\DataAbstractionLayer\Telemetry;
 
 use Shopware\Core\Framework\DataAbstractionLayer\Event\EntitySearchedEvent;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Telemetry\Metrics\Meter;
-use Shopware\Core\Framework\Telemetry\Metrics\Metric\Histogram;
+use Shopware\Core\Framework\Telemetry\Metrics\Metric\ConfiguredMetric;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * @internal
  */
 #[Package('core')]
-class EntityStatsSubscriber implements EventSubscriberInterface
+class EntityTelemetrySubscriber implements EventSubscriberInterface
 {
     /**
      * @internal
@@ -25,18 +25,17 @@ class EntityStatsSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            EntitySearchedEvent::class => ['onEntitySearched', 99],
+            EntitySearchedEvent::class => ['emitAssociationsCountMetric', 99],
         ];
     }
 
-    public function onEntitySearched(EntitySearchedEvent $event): void
+    public function emitAssociationsCountMetric(EntitySearchedEvent $event): void
     {
         $criteria = $event->getCriteria();
         $associationsCount = $this->getAssociationsCountFromCriteria($criteria);
-        $this->meter->emit(new Histogram(
-            name: 'dal.association.count',
+        $this->meter->emit(new ConfiguredMetric(
+            name: 'dal.associations.count',
             value: $associationsCount,
-            description: 'Number of associations in request',
         ));
     }
 
