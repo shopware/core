@@ -8,6 +8,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Webhook\EventLog\WebhookEventLogDefinition;
 use Shopware\Core\Framework\Webhook\Message\WebhookEventMessage;
+use Shopware\Core\Framework\Webhook\Service\RelatedWebhooks;
 use Shopware\Core\Framework\Webhook\WebhookEntity;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Messenger\Event\WorkerMessageFailedEvent;
@@ -25,7 +26,8 @@ class RetryWebhookMessageFailedSubscriber implements EventSubscriberInterface
      */
     public function __construct(
         private readonly EntityRepository $webhookRepository,
-        private readonly EntityRepository $webhookEventLogRepository
+        private readonly EntityRepository $webhookEventLogRepository,
+        private readonly RelatedWebhooks $relatedWebhooks
     ) {
     }
 
@@ -64,10 +66,7 @@ class RetryWebhookMessageFailedSubscriber implements EventSubscriberInterface
         }
 
         $webhookErrorCount = $webhook->getErrorCount() + 1;
-        $params = [
-            'id' => $webhook->getId(),
-            'errorCount' => $webhookErrorCount,
-        ];
+        $params = ['errorCount' => $webhookErrorCount];
 
         if ($webhookErrorCount >= self::MAX_WEBHOOK_ERROR_COUNT) {
             $params = array_merge($params, [
@@ -76,7 +75,7 @@ class RetryWebhookMessageFailedSubscriber implements EventSubscriberInterface
             ]);
         }
 
-        $this->webhookRepository->update([$params], $context);
+        $this->relatedWebhooks->updateRelated($webhookId, $params, $context);
     }
 
     private function markWebhookEventFailed(string $id, Context $context): void

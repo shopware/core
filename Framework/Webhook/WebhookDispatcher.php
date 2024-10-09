@@ -146,6 +146,7 @@ class WebhookDispatcher implements EventDispatcherInterface
         $webhooksForEvent = $this->getWebhooks()->filterForEvent($event->getName());
 
         $webhooksForEvent = $this->filterWebhooksByLiveVersion($webhooksForEvent, $event);
+        $webhooksForEvent = $this->filterDuplicates($webhooksForEvent);
 
         if ($webhooksForEvent->count() === 0) {
             return;
@@ -168,6 +169,27 @@ class WebhookDispatcher implements EventDispatcherInterface
         Profiler::trace('webhook::dispatch-async', function () use ($userLocale, $languageId, $affectedRoleIds, $event, $webhooksForEvent): void {
             $this->dispatchWebhooksToQueue($webhooksForEvent, $event, $affectedRoleIds, $languageId, $userLocale);
         });
+    }
+
+    /**
+     * If multiple apps register the same webhook to the same URL we just hit it once.
+     */
+    private function filterDuplicates(WebhookCollection $webhooks): WebhookCollection
+    {
+        $webhooks = $webhooks->reduce(
+            function (array $result, WebhookEntity $webhook) {
+                $key = $webhook->getEventName() . $webhook->getUrl() . ($webhook->getOnlyLiveVersion() ? '1' : '0');
+
+                if (!isset($result[$key])) {
+                    $result[$key] = $webhook;
+                }
+
+                return $result;
+            },
+            []
+        );
+
+        return new WebhookCollection(array_values($webhooks));
     }
 
     private function filterWebhooksByLiveVersion(WebhookCollection $webhooksForEvent, Hookable $event): WebhookCollection
