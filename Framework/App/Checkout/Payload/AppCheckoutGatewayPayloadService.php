@@ -51,7 +51,7 @@ class AppCheckoutGatewayPayloadService
      */
     private function getRequestOptions(SourcedPayloadInterface $payload, AppEntity $app, Context $context): array
     {
-        $payload->setSource($this->helper->buildSource($app));
+        $payload->setSource($this->helper->buildSource($app->getVersion()));
         $encoded = $this->helper->encode($payload);
         $jsonPayload = \json_encode($encoded, \JSON_THROW_ON_ERROR);
 

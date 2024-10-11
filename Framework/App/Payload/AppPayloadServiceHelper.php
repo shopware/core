@@ -3,7 +3,6 @@
 namespace Shopware\Core\Framework\App\Payload;
 
 use Shopware\Core\Framework\Api\Serializer\JsonEntityEncoder;
-use Shopware\Core\Framework\App\AppEntity;
 use Shopware\Core\Framework\App\Exception\AppUrlChangeDetectedException;
 use Shopware\Core\Framework\App\ShopId\ShopIdProvider;
 use Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry;
@@ -32,12 +31,12 @@ class AppPayloadServiceHelper
     /**
      * @throws AppUrlChangeDetectedException
      */
-    public function buildSource(AppEntity $app): Source
+    public function buildSource(string $appVersion): Source
     {
         return new Source(
             $this->shopUrl,
             $this->shopIdProvider->getShopId(),
-            $app->getVersion(),
+            $appVersion,
         );
     }
 

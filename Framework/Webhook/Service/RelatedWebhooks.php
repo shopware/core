@@ -5,10 +5,8 @@ namespace Shopware\Core\Framework\Webhook\Service;
 use Doctrine\DBAL\Connection;
 use PHPUnit\Framework\Attributes\CodeCoverageIgnore;
 use Shopware\Core\Framework\Context;
-use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Uuid\Uuid;
-use Shopware\Core\Framework\Webhook\WebhookCollection;
 
 /**
  * @internal
@@ -18,13 +16,21 @@ use Shopware\Core\Framework\Webhook\WebhookCollection;
 #[Package('core')]
 class RelatedWebhooks
 {
-    /**
-     * @param EntityRepository<WebhookCollection> $webhookRepository
-     */
     public function __construct(
         private readonly Connection $connection,
-        private readonly EntityRepository $webhookRepository,
     ) {
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    public function updateRelated(string $webhookId, array $data, Context $context): void
+    {
+        $relatedIds = $this->fetchIds($webhookId);
+
+        foreach ($relatedIds as $relatedId) {
+            $this->connection->update('webhook', $data, ['id' => Uuid::fromHexToBytes($relatedId)]);
+        }
     }
 
     /**
@@ -46,20 +52,5 @@ class RelatedWebhooks
 
         /** @var array<string> $result */
         return $result;
-    }
-
-    /**
-     * @param array<string, mixed> $data
-     */
-    public function updateRelated(string $webhookId, array $data, Context $context): void
-    {
-        $relatedIds = $this->fetchIds($webhookId);
-
-        $payload = [];
-        foreach ($relatedIds as $relatedId) {
-            $payload[] = [...$data, 'id' => $relatedId];
-        }
-
-        $this->webhookRepository->update($payload, $context);
     }
 }

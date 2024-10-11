@@ -2,14 +2,13 @@
 
 namespace Shopware\Core\Framework\Webhook\Subscriber;
 
+use Doctrine\DBAL\Connection;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Webhook\EventLog\WebhookEventLogDefinition;
 use Shopware\Core\Framework\Webhook\Message\WebhookEventMessage;
 use Shopware\Core\Framework\Webhook\Service\RelatedWebhooks;
-use Shopware\Core\Framework\Webhook\WebhookEntity;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Messenger\Event\WorkerMessageFailedEvent;
 
@@ -25,7 +24,7 @@ class RetryWebhookMessageFailedSubscriber implements EventSubscriberInterface
      * @internal
      */
     public function __construct(
-        private readonly EntityRepository $webhookRepository,
+        private readonly Connection $connection,
         private readonly EntityRepository $webhookEventLogRepository,
         private readonly RelatedWebhooks $relatedWebhooks
     ) {
@@ -56,21 +55,24 @@ class RetryWebhookMessageFailedSubscriber implements EventSubscriberInterface
 
         $this->markWebhookEventFailed($webhookEventLogId, $context);
 
-        /** @var WebhookEntity|null $webhook */
-        $webhook = $this->webhookRepository
-            ->search(new Criteria([$webhookId]), $context)
-            ->get($webhookId);
+        $rows = $this->connection->fetchAllAssociative(
+            'SELECT active, error_count FROM webhook WHERE id = :id',
+            ['id' => $webhookId]
+        );
 
-        if ($webhook === null || !$webhook->isActive()) {
+        /** @var array{active: int, error_count: int} $webhook */
+        $webhook = current($rows);
+
+        if ($webhook === null || !$webhook['active']) {
             return;
         }
 
-        $webhookErrorCount = $webhook->getErrorCount() + 1;
-        $params = ['errorCount' => $webhookErrorCount];
+        $webhookErrorCount = $webhook['error_count'] + 1;
+        $params = ['error_count' => $webhookErrorCount];
 
         if ($webhookErrorCount >= self::MAX_WEBHOOK_ERROR_COUNT) {
             $params = array_merge($params, [
-                'errorCount' => 0,
+                'error_count' => 0,
                 'active' => false,
             ]);
         }

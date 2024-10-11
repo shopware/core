@@ -99,7 +99,7 @@ final class WebhookEventMessageHandler
             ], $context);
 
             try {
-                $this->relatedWebhooks->updateRelated($message->getWebhookId(), ['errorCount' => 0], $context);
+                $this->relatedWebhooks->updateRelated($message->getWebhookId(), ['error_count' => 0], $context);
             } catch (AppNotFoundException|WriteTypeIntendException $e) {
                 // may happen if app or webhook got deleted in the meantime,
                 // we don't need to update the error-count in that case, so we can ignore the error

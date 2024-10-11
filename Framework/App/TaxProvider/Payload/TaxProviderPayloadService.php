@@ -12,7 +12,6 @@ use Shopware\Core\Framework\App\Payload\AppPayloadServiceHelper;
 use Shopware\Core\Framework\App\TaxProvider\Response\TaxProviderResponse;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\Log\Package;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * @internal only for use by the app-system
@@ -49,13 +48,9 @@ class TaxProviderPayloadService
      */
     private function getRequestOptions(TaxProviderPayload $payload, AppEntity $app, Context $context): array
     {
-        $payload->setSource($this->helper->buildSource($app));
+        $payload->setSource($this->helper->buildSource($app->getVersion()));
         $encoded = $this->helper->encode($payload);
         $jsonPayload = \json_encode($encoded, \JSON_THROW_ON_ERROR);
-
-        if (!$jsonPayload) {
-            throw new BadRequestHttpException(\sprintf('Empty payload, got: %s', \var_export($jsonPayload, true)));
-        }
 
         $secret = $app->getAppSecret();
 

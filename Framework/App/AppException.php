@@ -2,6 +2,7 @@
 
 namespace Shopware\Core\Framework\App;
 
+use Shopware\Core\Framework\App\Exception\ActionNotFoundException;
 use Shopware\Core\Framework\App\Exception\AppAlreadyInstalledException;
 use Shopware\Core\Framework\App\Exception\AppFlowException;
 use Shopware\Core\Framework\App\Exception\AppNotFoundException;
@@ -40,6 +41,7 @@ class AppException extends HttpException
     public const CHECKOUT_GATEWAY_PAYLOAD_INVALID_CODE = 'FRAMEWORK__APP_CHECKOUT_GATEWAY_PAYLOAD_INVALID';
     public const USER_ABORTED = 'FRAMEWORK__APP_USER_ABORTED';
     public const CANNOT_READ_FILE = 'FRAMEWORK__APP_CANNOT_READ_FILE';
+    public const APP_ACTION_NOT_FOUND = 'FRAMEWORK__APP_ACTION_NOT_FOUND';
 
     /**
      * @internal will be removed once store extensions are installed over composer
@@ -322,6 +324,22 @@ class AppException extends HttpException
             self::CANNOT_READ_FILE,
             'Unable to read file: "{{ file }}"',
             ['file' => $file]
+        );
+    }
+
+    /**
+     * @deprecated tag:v6.7.0 - reason:return-type-change - Will only return `self` in the future
+     */
+    public static function actionNotFound(): self|ActionNotFoundException
+    {
+        if (!Feature::isActive('v6.7.0.0')) {
+            return new ActionNotFoundException();
+        }
+
+        return new self(
+            Response::HTTP_NOT_FOUND,
+            self::APP_ACTION_NOT_FOUND,
+            'The requested app action does not exist',
         );
     }
 }
