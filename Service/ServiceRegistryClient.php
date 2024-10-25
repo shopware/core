@@ -72,7 +72,7 @@ class ServiceRegistryClient implements ResetInterface
                     (bool) ($service['activate-on-install'] ?? true),
                     $service['license-sync-endpoint'] ?? null
                 ),
-                $response->toArray()
+                $content['services']
             );
         } catch (ExceptionInterface $e) {
             return [];
@@ -89,7 +89,11 @@ class ServiceRegistryClient implements ResetInterface
      */
     private function validateResponse(array $content): bool
     {
-        foreach ($content as $service) {
+        if (!isset($content['services'])) {
+            return false;
+        }
+
+        foreach ($content['services'] as $service) {
             if (!\is_array($service)) {
                 return false;
             }
