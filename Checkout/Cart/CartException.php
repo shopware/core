@@ -521,14 +521,6 @@ class CartException extends HttpException
 
     public static function cartEmpty(): self|EmptyCartException
     {
-        if (!Feature::isActive('v6.7.0.0')) {
-            return new EmptyCartException();
-        }
-
-        return new self(
-            Response::HTTP_BAD_REQUEST,
-            self::CART_EMPTY,
-            'Cart is empty'
-        );
+        return new EmptyCartException();
     }
 }
