@@ -34,7 +34,7 @@ class Profiling extends Bundle
         parent::build($container);
 
         if (InstalledVersions::isInstalled('symfony/web-profiler-bundle')) {
-            parent::buildDefaultConfig($container);
+            $this->buildDefaultConfig($container);
         }
 
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/DependencyInjection/'));

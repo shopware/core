@@ -133,7 +133,7 @@ class Framework extends Bundle
         $container->addCompilerPass(new DemodataCompilerPass());
 
         parent::build($container);
-        parent::buildDefaultConfig($container);
+        $this->buildDefaultConfig($container);
     }
 
     public function boot(): void
