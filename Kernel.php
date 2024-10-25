@@ -2,13 +2,17 @@
 
 namespace Shopware\Core;
 
+use Composer\Autoload\ClassLoader;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception as DBALException;
 use Shopware\Core\DevOps\Environment\EnvironmentHelper;
 use Shopware\Core\Framework\Adapter\Database\MySQLFactory;
 use Shopware\Core\Framework\Api\Controller\FallbackController;
+use Shopware\Core\Framework\Bundle as ShopwareBundle;
 use Shopware\Core\Framework\Feature;
 use Shopware\Core\Framework\Log\Package;
+use Shopware\Core\Framework\Parameter\AdditionalBundleParameters;
+use Shopware\Core\Framework\Plugin\KernelPluginCollection;
 use Shopware\Core\Framework\Plugin\KernelPluginLoader\KernelPluginLoader;
 use Shopware\Core\Framework\Util\Hasher;
 use Shopware\Core\Framework\Util\VersionParser;
@@ -94,10 +98,27 @@ class Kernel extends HttpKernel
 
         foreach ($bundles as $class => $envs) {
             if (isset($envs['all']) || isset($envs[$this->environment])) {
+                /** @var ShopwareBundle|Bundle $bundle */
                 $bundle = new $class();
                 $instanciatedBundleNames[] = $bundle->getName();
 
                 yield $bundle;
+
+                if (!$bundle instanceof ShopwareBundle) {
+                    continue;
+                }
+
+                $classLoader = new ClassLoader();
+                $parameters = new AdditionalBundleParameters($classLoader, new KernelPluginCollection(), $this->getKernelParameters());
+                foreach ($bundle->getAdditionalBundles($parameters) as $additionalBundle) {
+                    if (\array_key_exists($additionalBundle->getName(), $instanciatedBundleNames)
+                        || \array_key_exists($additionalBundle->getName(), $this->bundles)) {
+                        continue;
+                    }
+
+                    $instanciatedBundleNames[] = $additionalBundle->getName();
+                    yield $additionalBundle;
+                }
             }
         }
 
@@ -410,7 +431,7 @@ PHP;
     private function addBundleRoutes(RoutingConfigurator $routes): void
     {
         foreach ($this->getBundles() as $bundle) {
-            if ($bundle instanceof Framework\Bundle) {
+            if ($bundle instanceof ShopwareBundle) {
                 $bundle->configureRoutes($routes, $this->environment);
             }
         }
@@ -419,7 +440,7 @@ PHP;
     private function addBundleOverwrites(RoutingConfigurator $routes): void
     {
         foreach ($this->getBundles() as $bundle) {
-            if ($bundle instanceof Framework\Bundle) {
+            if ($bundle instanceof ShopwareBundle) {
                 $bundle->configureRouteOverwrites($routes, $this->environment);
             }
         }
