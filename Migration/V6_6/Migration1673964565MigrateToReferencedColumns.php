@@ -43,6 +43,7 @@ class Migration1673964565MigrateToReferencedColumns extends MigrationStep
             );
         }
 
+        /** @phpstan-ignore shopware.dropStatement (Too late and too complex to revert and fix) */
         $this->dropColumnIfExists($connection, 'state_machine_history', 'entity_id');
     }
 }
