@@ -116,7 +116,7 @@ class ProductSliderCmsElementResolver extends AbstractCmsElementResolver
                 return;
             }
 
-            $finalProducts = $this->handleProductStream($streamResult, $resolverContext->getSalesChannelContext());
+            $finalProducts = $this->handleProductStream($streamResult, $resolverContext->getSalesChannelContext(), $entitySearchResult->getCriteria());
             $slider->setProducts($finalProducts);
             $slider->setStreamId($productConfig->getStringValue());
         }
@@ -233,11 +233,11 @@ class ProductSliderCmsElementResolver extends AbstractCmsElementResolver
         return $criteria;
     }
 
-    private function handleProductStream(ProductCollection $streamResult, SalesChannelContext $context): ProductCollection
+    private function handleProductStream(ProductCollection $streamResult, SalesChannelContext $context, Criteria $criteria): ProductCollection
     {
         $finalProductIds = $this->collectFinalProductIds($streamResult);
 
-        $fetchedProducts = $this->fetchProductsByIds($finalProductIds, $context);
+        $fetchedProducts = $this->fetchProductsByIds($finalProductIds, $context, $criteria);
 
         return $this->buildFinalProductCollection($finalProductIds, $fetchedProducts);
     }
@@ -272,14 +272,13 @@ class ProductSliderCmsElementResolver extends AbstractCmsElementResolver
     /**
      * @param string[] $finalProductIds List of product ids
      */
-    private function fetchProductsByIds(array $finalProductIds, SalesChannelContext $context): ProductCollection
+    private function fetchProductsByIds(array $finalProductIds, SalesChannelContext $context, Criteria $origin): ProductCollection
     {
         if (empty($finalProductIds)) {
             return new ProductCollection();
         }
 
-        $criteria = new Criteria($finalProductIds);
-        $criteria->addAssociation('options.group');
+        $criteria = $origin->cloneForRead($finalProductIds);
 
         /** @var ProductCollection $products */
         $products = $this->productRepository->search($criteria, $context)->getEntities();
