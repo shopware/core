@@ -11,5 +11,10 @@ abstract class AbstractProductReviewLoader
 {
     abstract public function getDecorated(): AbstractProductReviewLoader;
 
-    abstract public function load(Request $request, SalesChannelContext $context, string $productId, ?string $parentId = null): ProductReviewResult;
+    abstract public function load(
+        Request $request,
+        SalesChannelContext $context,
+        string $productId,
+        ?string $productParentId = null
+    ): ProductReviewResult;
 }

@@ -49,7 +49,6 @@ class ProductDescriptionReviewsCmsElementResolver extends AbstractProductDetailC
         $product = null;
 
         if ($productConfig->isMapped() && $resolverContext instanceof EntityResolverContext) {
-            /** @var ?SalesChannelProductEntity $product */
             $product = $this->resolveEntityValue($resolverContext->getEntity(), $productConfig->getStringValue());
         }
 
@@ -57,7 +56,7 @@ class ProductDescriptionReviewsCmsElementResolver extends AbstractProductDetailC
             $product = $this->getSlotProduct($slot, $result, $productConfig->getStringValue());
         }
 
-        if ($product !== null) {
+        if ($product instanceof SalesChannelProductEntity) {
             $reviews = $this->productReviewLoader->load($request, $resolverContext->getSalesChannelContext(), $product->getId(), $product->getParentId());
 
             $this->scriptExecutor->execute(new ProductReviewsWidgetLoadedHook($reviews, $resolverContext->getSalesChannelContext()));

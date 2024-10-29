@@ -34,7 +34,7 @@ All available Hooks that can be used to load additional data.
 | <!-- -->               | <!-- -->                                |
 |:-----------------------|:----------------------------------------|
 | **Name**               | product-reviews-widget-loaded                         |
-| **Since**              | 6.6.7.0                        |
+| **Since**              | 6.6.9.0                        |
 | **Class**              | `Shopware\Core\Content\Product\SalesChannel\Review\ProductReviewsWidgetLoadedHook`                      |
 | **Description**        | Triggered when the ProductReviewsWidget is loaded<br>                  |
 | **Available Data**     | reviews: [`Shopware\Core\Content\Product\SalesChannel\Review\ProductReviewResult`](https://github.com/shopware/platform/blob/trunk/src/Core/Content/Product/SalesChannel/Review/ProductReviewResult.php)<br>context: [`Shopware\Core\Framework\Context`](https://github.com/shopware/platform/blob/trunk/src/Core/Framework/Context.php)<br>salesChannelContext: [`Shopware\Core\System\SalesChannel\SalesChannelContext`](https://github.com/shopware/platform/blob/trunk/src/Core/System/SalesChannel/SalesChannelContext.php)<br>        |

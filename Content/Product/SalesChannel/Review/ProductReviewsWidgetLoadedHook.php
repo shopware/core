@@ -16,7 +16,7 @@ use Shopware\Core\System\SystemConfig\Facade\SystemConfigFacadeHookFactory;
  *
  * @hook-use-case data_loading
  *
- * @since 6.6.7.0
+ * @since 6.6.9.0
  *
  * @final
  */

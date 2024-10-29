@@ -14,20 +14,10 @@ use Symfony\Component\HttpFoundation\Request;
 final class ProductReviewsLoadedEvent extends NestedEvent implements ShopwareSalesChannelEvent
 {
     public function __construct(
-        protected ProductReviewResult $reviews,
+        public ProductReviewResult $reviews,
+        public Request $request,
         protected SalesChannelContext $salesChannelContext,
-        protected Request $request
     ) {
-    }
-
-    public function getReviews(): ProductReviewResult
-    {
-        return $this->reviews;
-    }
-
-    public function getSalesChannelContext(): SalesChannelContext
-    {
-        return $this->salesChannelContext;
     }
 
     public function getContext(): Context
@@ -35,8 +25,8 @@ final class ProductReviewsLoadedEvent extends NestedEvent implements ShopwareSal
         return $this->salesChannelContext->getContext();
     }
 
-    public function getRequest(): Request
+    public function getSalesChannelContext(): SalesChannelContext
     {
-        return $this->request;
+        return $this->salesChannelContext;
     }
 }

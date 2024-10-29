@@ -14,6 +14,8 @@ use Shopware\Core\Framework\Log\Package;
 class ProductReviewResult extends EntitySearchResult
 {
     /**
+     * @deprecated tag:v6.7.0 - Will be natively typed
+     *
      * @var string|null
      *
      * @deprecated tag:v6.7.0 - Will be natively typed
@@ -21,6 +23,8 @@ class ProductReviewResult extends EntitySearchResult
     protected $parentId;
 
     /**
+     * @deprecated tag:v6.7.0 - Will be natively typed
+     *
      * @var string
      *
      * @deprecated tag:v6.7.0 - Will be natively typed
@@ -28,6 +32,8 @@ class ProductReviewResult extends EntitySearchResult
     protected $productId;
 
     /**
+     * @deprecated tag:v6.7.0 - Will be natively typed
+     *
      * @var RatingMatrix
      *
      * @deprecated tag:v6.7.0 - Will be natively typed
@@ -35,6 +41,8 @@ class ProductReviewResult extends EntitySearchResult
     protected $matrix;
 
     /**
+     * @deprecated tag:v6.7.0 - Will be natively typed
+     *
      * @var ProductReviewEntity|null
      *
      * @deprecated tag:v6.7.0 - Will be natively typed
@@ -42,16 +50,15 @@ class ProductReviewResult extends EntitySearchResult
     protected $customerReview;
 
     /**
+     * @deprecated tag:v6.7.0 - Will be natively typed
+     *
      * @var int
      *
      * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $totalReviews;
 
-    /**
-     * @var int
-     */
-    protected $totalNativeReviews;
+    protected int $totalReviewsInCurrentLanguage;
 
     public function getProductId(): string
     {
@@ -93,14 +100,14 @@ class ProductReviewResult extends EntitySearchResult
         $this->totalReviews = $totalReviews;
     }
 
-    public function getTotalNativeReviews(): int
+    public function getTotalReviewsInCurrentLanguage(): int
     {
-        return $this->totalNativeReviews;
+        return $this->totalReviewsInCurrentLanguage;
     }
 
-    public function setTotalNativeReviews(int $totalNativeReviews): void
+    public function setTotalReviewsInCurrentLanguage(int $totalReviewsInCurrentLanguage): void
     {
-        $this->totalNativeReviews = $totalNativeReviews;
+        $this->totalReviewsInCurrentLanguage = $totalReviewsInCurrentLanguage;
     }
 
     public function getParentId(): ?string

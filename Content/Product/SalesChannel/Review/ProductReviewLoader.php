@@ -24,7 +24,11 @@ use Symfony\Component\HttpFoundation\Request;
 #[Package('inventory')]
 class ProductReviewLoader extends AbstractProductReviewLoader
 {
-    public const FILTER_LANGUAGE = 'filter-language';
+    private const PARAMETER_NAME_LIMIT = 'limit';
+    private const PARAMETER_NAME_PAGE = 'p';
+    private const PARAMETER_NAME_SORT = 'sort';
+    private const PARAMETER_NAME_LANGUAGE = 'language';
+    private const PARAMETER_NAME_POINTS = 'points';
 
     /**
      * @internal
@@ -41,22 +45,26 @@ class ProductReviewLoader extends AbstractProductReviewLoader
         throw new DecorationPatternException(self::class);
     }
 
-    public function load(Request $request, SalesChannelContext $context, string $productId, ?string $parentId = null): ProductReviewResult
-    {
+    public function load(
+        Request $request,
+        SalesChannelContext $context,
+        string $productId,
+        ?string $productParentId = null
+    ): ProductReviewResult {
         $reviewCriteria = $this->createReviewCriteria($request, $context);
         $reviews = $this->productReviewRoute
-            ->load($parentId ?? $productId, $request, $context, $reviewCriteria)
+            ->load($productParentId ?? $productId, $request, $context, $reviewCriteria)
             ->getResult();
 
         $reviewResult = ProductReviewResult::createFrom($reviews);
         $reviewResult->setMatrix($this->getReviewRatingMatrix($reviews));
         $reviewResult->setCustomerReview($this->getCustomerReview($productId, $context));
         $reviewResult->setTotalReviews($reviews->getTotal());
-        $reviewResult->setTotalNativeReviews($this->getTotalNativeReviews($reviews));
+        $reviewResult->setTotalReviewsInCurrentLanguage($this->getTotalReviewsInCurrentLanguage($reviews));
         $reviewResult->setProductId($productId);
-        $reviewResult->setParentId($parentId ?? $productId);
+        $reviewResult->setParentId($productParentId ?? $productId);
 
-        $this->eventDispatcher->dispatch(new ProductReviewsLoadedEvent($reviewResult, $context, $request));
+        $this->eventDispatcher->dispatch(new ProductReviewsLoadedEvent($reviewResult, $request, $context));
 
         return $reviewResult;
     }
@@ -64,7 +72,7 @@ class ProductReviewLoader extends AbstractProductReviewLoader
     /**
      * @param EntitySearchResult<ProductReviewCollection> $reviews
      */
-    protected function getReviewRatingMatrix(EntitySearchResult $reviews): RatingMatrix
+    private function getReviewRatingMatrix(EntitySearchResult $reviews): RatingMatrix
     {
         $aggregation = $reviews->getAggregations()->get('ratingMatrix');
 
@@ -78,7 +86,7 @@ class ProductReviewLoader extends AbstractProductReviewLoader
     /**
      * @param EntitySearchResult<ProductReviewCollection> $reviews
      */
-    protected function getTotalNativeReviews(EntitySearchResult $reviews): int
+    private function getTotalReviewsInCurrentLanguage(EntitySearchResult $reviews): int
     {
         $aggregation = $reviews->getAggregations()->get('languageMatrix');
 
@@ -91,10 +99,10 @@ class ProductReviewLoader extends AbstractProductReviewLoader
         return $reviews->getTotal();
     }
 
-    protected function createReviewCriteria(Request $request, SalesChannelContext $context): Criteria
+    private function createReviewCriteria(Request $request, SalesChannelContext $context): Criteria
     {
-        $limit = (int) $request->get('limit', $this->systemConfigService->getInt('core.listing.reviewsPerPage', $context->getSalesChannelId()));
-        $page = (int) $request->get('p', 1);
+        $limit = (int) $request->get(self::PARAMETER_NAME_LIMIT, $this->systemConfigService->getInt('core.listing.reviewsPerPage', $context->getSalesChannelId()));
+        $page = (int) $request->get(self::PARAMETER_NAME_PAGE, 1);
         $offset = max(0, $limit * ($page - 1));
 
         $criteria = new Criteria();
@@ -103,13 +111,13 @@ class ProductReviewLoader extends AbstractProductReviewLoader
         $criteria->setTotalCountMode(Criteria::TOTAL_COUNT_MODE_EXACT);
 
         $sorting = new FieldSorting('createdAt', 'DESC');
-        if ($request->get('sort', 'createdAt') === 'points') {
+        if ($request->get(self::PARAMETER_NAME_SORT, 'createdAt') === 'points') {
             $sorting = new FieldSorting('points', 'DESC');
         }
 
         $criteria->addSorting($sorting);
 
-        if ($request->get('language') === self::FILTER_LANGUAGE) {
+        if ($request->get(self::PARAMETER_NAME_LANGUAGE) === 'filter-language') {
             $criteria->addPostFilter(
                 new EqualsFilter('languageId', $context->getContext()->getLanguageId())
             );
@@ -122,7 +130,7 @@ class ProductReviewLoader extends AbstractProductReviewLoader
         return $criteria;
     }
 
-    protected function getCustomerReview(string $productId, SalesChannelContext $context): ?ProductReviewEntity
+    private function getCustomerReview(string $productId, SalesChannelContext $context): ?ProductReviewEntity
     {
         $customer = $context->getCustomer();
 
@@ -137,15 +145,16 @@ class ProductReviewLoader extends AbstractProductReviewLoader
 
         $customerReviews = $this->productReviewRoute
             ->load($productId, new Request(), $context, $criteria)
-            ->getResult()->getEntities();
+            ->getResult()
+            ->getEntities();
 
         return $customerReviews->first();
     }
 
-    protected function handlePointsAggregation(Request $request, Criteria $criteria, SalesChannelContext $context): void
+    private function handlePointsAggregation(Request $request, Criteria $criteria, SalesChannelContext $context): void
     {
         $reviewFilters = [];
-        $points = $request->get('points', []);
+        $points = $request->get(self::PARAMETER_NAME_POINTS, []);
 
         if (\is_array($points) && \count($points) > 0) {
             $pointFilter = [];
