@@ -123,7 +123,7 @@ class Kernel extends HttpKernel
         }
 
         if ((!Feature::has('v6.7.0.0') || !Feature::isActive('v6.7.0.0')) && !isset($bundles[Service\Service::class])) {
-            Feature::triggerDeprecationOrThrow('v6.7.0.0', 'The %s bundle should be added to config/bundles.php');
+            Feature::triggerDeprecationOrThrow('v6.7.0.0', \sprintf('The %s bundle should be added to config/bundles.php', Service\Service::class));
             yield new Service\Service();
         }
 
