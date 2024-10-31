@@ -7,6 +7,8 @@ use Shopware\Core\Framework\Adapter\Cache\ReverseProxy\ReverseProxyCompilerPass;
 use Shopware\Core\Framework\Adapter\Redis\RedisConnectionsCompilerPass;
 use Shopware\Core\Framework\DataAbstractionLayer\AttributeEntityCompiler;
 use Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityDefinition;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityExtension;
 use Shopware\Core\Framework\DataAbstractionLayer\Exception\DefinitionNotFoundException;
 use Shopware\Core\Framework\DataAbstractionLayer\ExtensionRegistry;
 use Shopware\Core\Framework\DependencyInjection\CompilerPass\AssetBundleRegistrationCompilerPass;
@@ -166,27 +168,55 @@ class Framework extends Bundle
         ExtensionRegistry $registry
     ): void {
         foreach ($registry->getExtensions() as $extension) {
-            /** @var string $class */
-            $class = $extension->getDefinitionClass();
-
-            try {
-                $definition = $definitionRegistry->get($class);
-            } catch (DefinitionNotFoundException) {
-                continue;
-            }
-
-            $definition->addExtension($extension);
-
-            try {
-                $salesChannelDefinition = $salesChannelRegistry->get($class);
-            } catch (DefinitionNotFoundException) {
-                continue;
-            }
-
-            // same definition? do not added extension
-            if ($salesChannelDefinition !== $definition) {
-                $salesChannelDefinition->addExtension($extension);
-            }
+            $this->addExtension($definitionRegistry, $salesChannelRegistry, $extension);
         }
+
+        foreach ($registry->buildBulkExtensions($definitionRegistry) as $extension) {
+            $this->addExtension($definitionRegistry, $salesChannelRegistry, $extension);
+        }
+    }
+
+    private function addExtension(
+        DefinitionInstanceRegistry $definitionRegistry,
+        SalesChannelDefinitionInstanceRegistry $salesChannelRegistry,
+        EntityExtension $extension
+    ): void {
+        try {
+            $definition = $this->getInstance($definitionRegistry, $extension);
+        } catch (DefinitionNotFoundException) {
+            return;
+        }
+
+        $definition->addExtension($extension);
+
+        try {
+            $salesChannelDefinition = $this->getInstance($salesChannelRegistry, $extension);
+        } catch (DefinitionNotFoundException) {
+            return;
+        }
+
+        // same definition? do not added extension
+        if ($salesChannelDefinition !== $definition) {
+            $salesChannelDefinition->addExtension($extension);
+        }
+    }
+
+    private function getInstance(DefinitionInstanceRegistry $registry, EntityExtension $extension): EntityDefinition
+    {
+        if (Feature::isActive('v6.7.0.0')) {
+            $entity = $extension->getEntityName();
+
+            return $registry->getByEntityName($entity);
+        }
+
+        if (!empty($extension->getEntityName())) {
+            $entity = $extension->getEntityName();
+
+            return $registry->getByEntityName($entity);
+        }
+
+        $class = $extension->getDefinitionClass();
+
+        return $registry->get($class);
     }
 }
