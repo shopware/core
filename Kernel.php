@@ -100,6 +100,11 @@ class Kernel extends HttpKernel
             if (isset($envs['all']) || isset($envs[$this->environment])) {
                 /** @var ShopwareBundle|Bundle $bundle */
                 $bundle = new $class();
+
+                if ($this->isBundleRegistered($bundle, $instanciatedBundleNames)) {
+                    continue;
+                }
+
                 $instanciatedBundleNames[] = $bundle->getName();
 
                 yield $bundle;
@@ -111,8 +116,7 @@ class Kernel extends HttpKernel
                 $classLoader = new ClassLoader();
                 $parameters = new AdditionalBundleParameters($classLoader, new KernelPluginCollection(), $this->getKernelParameters());
                 foreach ($bundle->getAdditionalBundles($parameters) as $additionalBundle) {
-                    if (\array_key_exists($additionalBundle->getName(), $instanciatedBundleNames)
-                        || \array_key_exists($additionalBundle->getName(), $this->bundles)) {
+                    if ($this->isBundleRegistered($additionalBundle, $instanciatedBundleNames)) {
                         continue;
                     }
 
@@ -455,5 +459,14 @@ PHP;
         $route->setDefault(PlatformRequest::ATTRIBUTE_ROUTE_SCOPE, ['storefront']);
 
         $routes->add('root.fallback', $route->getPath());
+    }
+
+    /**
+     * @param array<int, string> $instanciatedBundleNames
+     */
+    private function isBundleRegistered(Bundle|ShopwareBundle $bundle, array $instanciatedBundleNames): bool
+    {
+        return \array_key_exists($bundle->getName(), $instanciatedBundleNames)
+            || \array_key_exists($bundle->getName(), $this->bundles);
     }
 }
