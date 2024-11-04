@@ -14,7 +14,7 @@ use Shopware\Core\Framework\Rule\RuleScope;
 #[Package('services-settings')]
 class CustomerRequestedGroupRule extends Rule
 {
-    final public const RULE_NAME = 'customerRequestedCustomerGroup';
+    final public const RULE_NAME = 'customerRequestedGroup';
 
     /**
      * @internal
