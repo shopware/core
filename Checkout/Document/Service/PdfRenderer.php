@@ -70,9 +70,8 @@ final class PdfRenderer
             gc_enable();
         }
 
-        return (string)$dompdf->output();
+        return (string) $dompdf->output();
     }
-
 
     /**
      * Replace a predefined placeholder with the total page count in the whole PDF document
