@@ -379,6 +379,10 @@
             <tag name="console.command" />
         </service>
 
+        <service id="Shopware\Core\Checkout\Customer\DeleteUnusedGuestCustomerTask">
+            <tag name="shopware.scheduled.task"/>
+        </service>
+
         <service id="Shopware\Core\Checkout\Customer\DeleteUnusedGuestCustomerHandler">
             <argument type="service" id="scheduled_task.repository"/>
             <argument type="service" id="logger"/>
