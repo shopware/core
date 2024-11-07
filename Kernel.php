@@ -16,6 +16,7 @@ use Shopware\Core\Framework\Plugin\KernelPluginCollection;
 use Shopware\Core\Framework\Plugin\KernelPluginLoader\KernelPluginLoader;
 use Shopware\Core\Framework\Util\Hasher;
 use Shopware\Core\Framework\Util\VersionParser;
+use Shopware\Core\Service\Service;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Config\ConfigCache;
 use Symfony\Component\Config\Loader\LoaderInterface;
@@ -46,16 +47,22 @@ class Kernel extends HttpKernel
 
     /**
      * @var KernelPluginLoader
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $pluginLoader;
 
     /**
      * @var string
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $shopwareVersion;
 
     /**
      * @var string|null
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $shopwareVersionRevision;
 
@@ -126,9 +133,9 @@ class Kernel extends HttpKernel
             }
         }
 
-        if ((!Feature::has('v6.7.0.0') || !Feature::isActive('v6.7.0.0')) && !isset($bundles[Service\Service::class])) {
-            Feature::triggerDeprecationOrThrow('v6.7.0.0', \sprintf('The %s bundle should be added to config/bundles.php', Service\Service::class));
-            yield new Service\Service();
+        if ((!Feature::has('v6.7.0.0') || !Feature::isActive('v6.7.0.0')) && !isset($bundles[Service::class])) {
+            Feature::triggerDeprecationOrThrow('v6.7.0.0', \sprintf('The %s bundle should be added to config/bundles.php', Service::class));
+            yield new Service();
         }
 
         yield from $this->pluginLoader->getBundles($this->getKernelParameters(), $instanciatedBundleNames);
