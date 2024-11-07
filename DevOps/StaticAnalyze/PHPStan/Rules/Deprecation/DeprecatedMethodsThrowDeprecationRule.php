@@ -8,6 +8,7 @@ use PHPStan\Analyser\Scope;
 use PHPStan\Reflection\ClassReflection;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleError;
+use PHPStan\Rules\RuleErrorBuilder;
 use PHPUnit\Framework\TestCase;
 use Shopware\Core\Framework\Log\Package;
 
@@ -99,11 +100,13 @@ class DeprecatedMethodsThrowDeprecationRule implements Rule
         $classDeprecation = $class->getDeprecatedDescription();
         if ($classDeprecation && !$this->handlesDeprecationCorrectly($classDeprecation, $methodContent)) {
             return [
-                \sprintf(
+                RuleErrorBuilder::message(\sprintf(
                     'Class "%s" is marked as deprecated, but method "%s" does not call "Feature::triggerDeprecationOrThrow". All public methods of deprecated classes need to trigger a deprecation warning.',
                     $class->getName(),
                     $method->getName()
-                ),
+                ))
+                    ->identifier('shopware.deprecatedClass')
+                    ->build(),
             ];
         }
 
@@ -115,11 +118,13 @@ class DeprecatedMethodsThrowDeprecationRule implements Rule
 
         if (!$deprecationOfParentMethod && $methodDeprecation && !$this->handlesDeprecationCorrectly($methodDeprecation, $methodContent)) {
             return [
-                \sprintf(
+                RuleErrorBuilder::message(\sprintf(
                     'Method "%s" of class "%s" is marked as deprecated, but does not call "Feature::triggerDeprecationOrThrow". All deprecated methods need to trigger a deprecation warning.',
                     $method->getName(),
                     $class->getName()
-                ),
+                ))
+                    ->identifier('shopware.deprecatedMethod')
+                    ->build(),
             ];
         }
 
@@ -128,14 +133,16 @@ class DeprecatedMethodsThrowDeprecationRule implements Rule
 
     private function getMethodContent(Node $node, Scope $scope, ClassReflection $class): string
     {
-        /** @var string $filename */
         $filename = $class->getFileName();
 
         $trait = $scope->getTraitReflection();
 
         if ($trait) {
-            /** @var string $filename */
             $filename = $trait->getFileName();
+        }
+
+        if ($filename === null) {
+            return '';
         }
 
         $file = new \SplFileObject($filename);
