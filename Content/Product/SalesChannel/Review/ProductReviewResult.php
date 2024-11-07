@@ -15,26 +15,36 @@ class ProductReviewResult extends EntitySearchResult
 {
     /**
      * @var string|null
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $parentId;
 
     /**
      * @var string
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $productId;
 
     /**
      * @var RatingMatrix
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $matrix;
 
     /**
      * @var ProductReviewEntity|null
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $customerReview;
 
     /**
      * @var int
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $totalReviews;
 
