@@ -16,3 +16,4 @@ rules:
     - Shopware\Core\DevOps\StaticAnalyze\PHPStan\Rules\UseCLIContextRule
     - Shopware\Core\DevOps\StaticAnalyze\PHPStan\Rules\NoInconfiguredMetricAllowed
     - Shopware\Core\DevOps\StaticAnalyze\PHPStan\Rules\UseHasherRule
+    - Shopware\Core\DevOps\StaticAnalyze\PHPStan\Rules\PropertyNativeTypeRule
