@@ -124,7 +124,7 @@ class CartOrderRoute extends AbstractCartOrderRoute
         $this->cartPersister->delete($context->getToken(), $context);
 
         // @deprecated tag:v6.7.0 - remove post payment completely
-        if (!Feature::isActive('v6.7.0.0')) {
+        Feature::callSilentIfInactive('v6.7.0.0', function () use ($orderEntity, $data, $context, $orderId, $preOrderPayment): void {
             try {
                 Profiler::trace('checkout-order::post-payment', function () use ($orderEntity, $data, $context, $preOrderPayment): void {
                     $this->preparedPaymentService->handlePostOrderPayment($orderEntity, $data, $context, $preOrderPayment);
@@ -132,7 +132,7 @@ class CartOrderRoute extends AbstractCartOrderRoute
             } catch (PaymentException) {
                 throw CartException::invalidPaymentButOrderStored($orderId);
             }
-        }
+        });
 
         return new CartOrderRouteResponse($orderEntity);
     }
