@@ -21,21 +21,19 @@ class Migration1730059142AddNewSitemapConfigForExcludingHiddenProducts extends M
 
     public function update(Connection $connection): void
     {
-        $query = 'INSERT IGNORE INTO system_config SET
-                    id = :id,
-                    configuration_value = :configValue,
-                    configuration_key = :configKey,
-                    created_at = :createdAt;';
+        $config = $connection->fetchOne(
+            'SELECT id FROM system_config WHERE configuration_key = \'core.sitemap.excludeLinkedProducts\''
+        );
 
-        $connection->executeStatement($query, [
+        if ($config !== false) {
+            return;
+        }
+
+        $connection->insert('system_config', [
             'id' => Uuid::randomBytes(),
-            'configKey' => 'core.sitemap.excludeLinkedProducts',
-            'configValue' => '{"_value": false}',
-            'createdAt' => (new \DateTime())->format(Defaults::STORAGE_DATE_TIME_FORMAT),
+            'configuration_key' => 'core.sitemap.excludeLinkedProducts',
+            'configuration_value' => '{"_value": false}',
+            'created_at' => (new \DateTime())->format(Defaults::STORAGE_DATE_TIME_FORMAT),
         ]);
-    }
-
-    public function updateDestructive(Connection $connection): void
-    {
     }
 }
