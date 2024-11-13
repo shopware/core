@@ -4,6 +4,7 @@ namespace Shopware\Core\Framework\Adapter;
 
 use Shopware\Core\Framework\HttpException;
 use Shopware\Core\Framework\Log\Package;
+use Symfony\Component\Asset\Exception\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 use Twig\Node\Expression\AbstractExpression;
 
@@ -23,6 +24,7 @@ class AdapterException extends HttpException
      * @internal
      */
     public const REDIS_MISSING_CONNECTION_PARAMETER = 'FRAMEWORK__REDIS_MISSING_CONNECTION_PARAMETER';
+    public const INVALID_ASSET_URL = 'FRAMEWORK__INVALID_ASSET_URL';
 
     public static function unexpectedTwigExpression(AbstractExpression $expression): self
     {
@@ -121,6 +123,19 @@ class AdapterException extends HttpException
                 'connectionName' => json_encode($connectionName),
                 'dsn' => json_encode($dsn),
             ],
+        );
+    }
+
+    public static function invalidAssetUrl(InvalidArgumentException $previous): self
+    {
+        return new self(
+            Response::HTTP_INTERNAL_SERVER_ERROR,
+            self::INVALID_ASSET_URL,
+            'Invalid asset URL. Check the "APP_URL" environment variable. Error message: {{ message }}',
+            [
+                'message' => $previous->getMessage(),
+            ],
+            $previous
         );
     }
 }
