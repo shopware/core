@@ -22,13 +22,13 @@ readonly class MessageQueueSizeRestrictListener
      */
     public function __construct(
         private MessageSizeCalculator $calculator,
-        private bool $enforceLimit
+        private bool $enforceMessageSize
     ) {
     }
 
     public function __invoke(SendMessageToTransportsEvent $event): void
     {
-        if (!$this->enforceLimit) {
+        if (!$this->enforceMessageSize) {
             return;
         }
 
@@ -42,11 +42,10 @@ readonly class MessageQueueSizeRestrictListener
         }
 
         $messageLengthInBytes = $this->calculator->size($event->getEnvelope());
-
         if ($messageLengthInBytes > self::MESSAGE_SIZE_LIMIT) {
             $messageName = $event->getEnvelope()->getMessage()::class;
 
-            throw MessageQueueException::queueMessageSizeExceeded($messageName);
+            throw MessageQueueException::queueMessageSizeExceeded($messageName, $messageLengthInBytes / 1024);
         }
     }
 }
