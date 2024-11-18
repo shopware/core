@@ -46,6 +46,10 @@ class StockStorage extends AbstractStockStorage
             return;
         }
 
+        if (\count($changes) === 0) {
+            return;
+        }
+
         $sql = <<<'SQL'
             UPDATE product
             SET stock = stock + :quantity, sales = sales - :quantity, available_stock = stock
