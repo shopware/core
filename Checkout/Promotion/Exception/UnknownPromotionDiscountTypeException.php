@@ -3,10 +3,14 @@
 namespace Shopware\Core\Checkout\Promotion\Exception;
 
 use Shopware\Core\Checkout\Promotion\Aggregate\PromotionDiscount\PromotionDiscountEntity;
+use Shopware\Core\Framework\Feature;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\ShopwareHttpException;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @deprecated tag:v6.7.0 - Will be removed. Use PromotionException::unknownPromotionDiscountType instead
+ */
 #[Package('buyers-experience')]
 class UnknownPromotionDiscountTypeException extends ShopwareHttpException
 {
@@ -20,11 +24,21 @@ class UnknownPromotionDiscountTypeException extends ShopwareHttpException
 
     public function getErrorCode(): string
     {
+        Feature::triggerDeprecationOrThrow(
+            'v6.7.0.0',
+            Feature::deprecatedClassMessage(self::class, 'v6.7.0.0', 'PromotionException::unknownPromotionDiscountType')
+        );
+
         return 'CHECKOUT__UNKNOWN_PROMOTION_DISCOUNT_TYPE';
     }
 
     public function getStatusCode(): int
     {
+        Feature::triggerDeprecationOrThrow(
+            'v6.7.0.0',
+            Feature::deprecatedClassMessage(self::class, 'v6.7.0.0', 'PromotionException::unknownPromotionDiscountType')
+        );
+
         return Response::HTTP_BAD_REQUEST;
     }
 }
