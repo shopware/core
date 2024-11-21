@@ -9,7 +9,7 @@ use Shopware\Core\Framework\Log\Package;
 abstract class BulkEntityExtension
 {
     /**
-     * @return \Generator<string, Field[]>
+     * @return \Generator<string, list<Field>>
      */
     abstract public function collect(): \Generator;
 }
