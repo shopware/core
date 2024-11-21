@@ -3,9 +3,6 @@ shopware:
         api_browser:
             auth_required: false
 
-    cache:
-        cache_compression: false
-
     media:
         enable_url_upload_feature: true
         enable_url_validation: false
