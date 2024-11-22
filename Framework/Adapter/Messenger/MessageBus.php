@@ -74,7 +74,9 @@ class MessageBus implements MessageBusInterface
      */
     private function getTransports(object $message, array $overwrites, bool $inherited): array|string|null
     {
-        $class = $message::class;
+        $class = $message instanceof Envelope
+            ? $message->getMessage()::class
+            : $message::class;
 
         if (\array_key_exists($class, $overwrites)) {
             return $overwrites[$class];
