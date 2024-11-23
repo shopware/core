@@ -336,6 +336,7 @@ class RecalculationService
             ->addAssociation('lineItems.downloads')
             ->addAssociation('transactions.stateMachineState')
             ->addAssociation('deliveries.shippingMethod.tax')
+            ->addAssociation('deliveries.shippingMethod.deliveryTime')
             ->addAssociation('deliveries.positions.orderLineItem')
             ->addAssociation('deliveries.shippingOrderAddress.country')
             ->addAssociation('deliveries.shippingOrderAddress.countryState');
