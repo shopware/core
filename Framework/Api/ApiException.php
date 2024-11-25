@@ -54,6 +54,8 @@ class ApiException extends HttpException
     public const API_INVALID_ASSOCIATION_FIELD = 'FRAMEWORK__API_INVALID_ASSOCIATION';
     public const API_UNSUPPORTED_ENCODER_INPUT = 'FRAMEWORK__API_UNSUPPORTED_ENCODER_INPUT';
 
+    public const API_ROUTES_ARE_LOADED_ALREADY = 'FRAMEWORK__API_ROUTES_ARE_LOADED_ALREADY';
+
     /**
      * @param array<array{pointer: string, entity: string}> $exceptions
      */
@@ -363,6 +365,15 @@ class ApiException extends HttpException
             Response::HTTP_INTERNAL_SERVER_ERROR,
             self::API_UNSUPPORTED_ENCODER_INPUT,
             'Unsupported encoder data provided. Only entities and entity collections are supported',
+        );
+    }
+
+    public static function apiRoutesAreAlreadyLoaded(): self
+    {
+        return new self(
+            Response::HTTP_INTERNAL_SERVER_ERROR,
+            self::API_ROUTES_ARE_LOADED_ALREADY,
+            'API routes are already loaded',
         );
     }
 }
