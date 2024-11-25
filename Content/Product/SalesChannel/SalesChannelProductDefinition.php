@@ -58,6 +58,7 @@ class SalesChannelProductDefinition extends ProductDefinition implements SalesCh
                 ->addAssociation('unit')
                 ->addAssociation('deliveryTime')
                 ->addAssociation('cover.media')
+                ->addAssociation('tax')
             ;
         }
 
