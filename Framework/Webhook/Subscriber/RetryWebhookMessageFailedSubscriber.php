@@ -63,7 +63,7 @@ class RetryWebhookMessageFailedSubscriber implements EventSubscriberInterface
         /** @var array{active: int, error_count: int} $webhook */
         $webhook = current($rows);
 
-        if ($webhook === null || !$webhook['active']) {
+        if (!\is_array($webhook) || !$webhook['active']) {
             return;
         }
 
