@@ -97,7 +97,7 @@
         </service>
 
         <service id="Shopware\Core\Framework\App\Lifecycle\Persister\WebhookPersister">
-            <argument type="service" id="webhook.repository"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
         </service>
 
         <service id="Shopware\Core\Framework\App\Lifecycle\Persister\PaymentMethodPersister">
