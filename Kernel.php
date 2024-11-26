@@ -103,6 +103,8 @@ class Kernel extends HttpKernel
         $bundles = require $this->getProjectDir() . '/config/bundles.php';
         $instanciatedBundleNames = [];
 
+        $kernelParameters = $this->getKernelParameters();
+
         foreach ($bundles as $class => $envs) {
             if (isset($envs['all']) || isset($envs[$this->environment])) {
                 /** @var ShopwareBundle|Bundle $bundle */
@@ -121,7 +123,7 @@ class Kernel extends HttpKernel
                 }
 
                 $classLoader = new ClassLoader();
-                $parameters = new AdditionalBundleParameters($classLoader, new KernelPluginCollection(), $this->getKernelParameters());
+                $parameters = new AdditionalBundleParameters($classLoader, new KernelPluginCollection(), $kernelParameters);
                 foreach ($bundle->getAdditionalBundles($parameters) as $additionalBundle) {
                     if ($this->isBundleRegistered($additionalBundle, $instanciatedBundleNames)) {
                         continue;
@@ -138,7 +140,7 @@ class Kernel extends HttpKernel
             yield new Service();
         }
 
-        yield from $this->pluginLoader->getBundles($this->getKernelParameters(), $instanciatedBundleNames);
+        yield from $this->pluginLoader->getBundles($kernelParameters, $instanciatedBundleNames);
     }
 
     public function getProjectDir(): string

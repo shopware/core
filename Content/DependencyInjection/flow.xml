@@ -15,13 +15,13 @@
 
         <service id="Shopware\Core\Content\Flow\Dispatching\FlowDispatcher" decorates="event_dispatcher" decoration-priority="1000">
             <argument type="service" id="Shopware\Core\Content\Flow\Dispatching\FlowDispatcher.inner"/>
-            <argument type="service" id="logger"/>
-            <argument type="service" id="Shopware\Core\Content\Flow\Dispatching\FlowFactory"/>
-            <argument type="service" id="Doctrine\DBAL\Connection"/>
-
-            <call method="setContainer">
-                <argument type="service" id="service_container"/>
-            </call>
+            <argument type="service_locator">
+                <argument type="service" key="logger" id="logger"/>
+                <argument type="service" key="Doctrine\DBAL\Connection" id="Doctrine\DBAL\Connection"/>
+                <argument type="service" key="Shopware\Core\Content\Flow\Dispatching\FlowFactory" id="Shopware\Core\Content\Flow\Dispatching\FlowFactory"/>
+                <argument type="service" key="Shopware\Core\Content\Flow\Dispatching\FlowExecutor" id="Shopware\Core\Content\Flow\Dispatching\FlowExecutor"/>
+                <argument type="service" key="Shopware\Core\Content\Flow\Dispatching\FlowLoader" id="Shopware\Core\Content\Flow\Dispatching\FlowLoader"/>
+            </argument>
         </service>
 
         <service id="Shopware\Core\Content\Flow\Rule\FlowRuleScopeBuilder">

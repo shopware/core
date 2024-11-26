@@ -15,7 +15,7 @@
             <tag name="kernel.event_subscriber"/>
         </service>
 
-        <service id="Shopware\Core\Framework\Adapter\Cache\CacheTracer">
+        <service id="Shopware\Core\Framework\Adapter\Cache\CacheTracer" lazy="true">
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
             <argument type="service" id="Shopware\Core\Framework\Adapter\Translation\Translator"/>
             <argument type="service" id="Shopware\Core\Framework\Adapter\Cache\CacheTagCollection"/>
