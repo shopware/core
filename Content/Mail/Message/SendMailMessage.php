@@ -5,19 +5,16 @@ namespace Shopware\Core\Content\Mail\Message;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\MessageQueue\AsyncMessageInterface;
 
+/**
+ * @codeCoverageIgnore
+ */
 #[Package('services-settings')]
 class SendMailMessage implements AsyncMessageInterface
 {
     /**
      * @internal
      */
-    public function __construct(
-        private readonly string $mailDataPath
-    ) {
-    }
-
-    public function getMailDataPath(): string
+    public function __construct(public readonly string $mailDataPath)
     {
-        return $this->mailDataPath;
     }
 }

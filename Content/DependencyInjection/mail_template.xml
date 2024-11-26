@@ -47,6 +47,7 @@
         <service id="Shopware\Core\Content\Mail\Message\SendMailHandler">
             <argument type="service" id="mailer.transports"/>
             <argument type="service" id="shopware.filesystem.private"/>
+            <argument type="service" id="logger"/>
             <tag name="messenger.message_handler"/>
         </service>
 

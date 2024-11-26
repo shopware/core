@@ -8,7 +8,7 @@ use Shopware\Core\Content\Mail\Message\SendMailMessage;
 use Shopware\Core\Framework\Feature;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Plugin\Exception\DecorationPatternException;
-use Shopware\Core\Framework\Uuid\Uuid;
+use Shopware\Core\Framework\Util\Hasher;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -58,12 +58,10 @@ class MailSender extends AbstractMailSender
             throw MailException::mailBodyTooLong($this->maxContentLength);
         }
 
-        $mailDataPath = self::BASE_FILE_SYSTEM_PATH . Uuid::randomHex();
-
         $mailData = serialize($email);
+        $mailDataPath = self::BASE_FILE_SYSTEM_PATH . Hasher::hash($mailData);
 
         $this->filesystem->write($mailDataPath, $mailData);
-
         $this->messageBus->dispatch(new SendMailMessage($mailDataPath));
     }
 }
