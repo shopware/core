@@ -2,6 +2,7 @@
 
 namespace Shopware\Core\Framework\Adapter;
 
+use Shopware\Core\Framework\Adapter\Twig\Exception\StringTemplateRenderingException;
 use Shopware\Core\Framework\Feature;
 use Shopware\Core\Framework\HttpException;
 use Shopware\Core\Framework\Log\Package;
@@ -85,6 +86,20 @@ class AdapterException extends HttpException
             Response::HTTP_BAD_REQUEST,
             self::INVALID_TEMPLATE_SYNTAX,
             'Failed rendering Twig string template due syntax error: "{{ message }}"',
+            ['message' => $message]
+        );
+    }
+
+    public static function renderingTemplateFailed(string $message): self
+    {
+        if (!Feature::isActive('v6.7.0.0')) {
+            return new StringTemplateRenderingException($message);
+        }
+
+        return new self(
+            Response::HTTP_BAD_REQUEST,
+            'FRAMEWORK__STRING_TEMPLATE_RENDERING_FAILED',
+            'Failed rendering string template using Twig: {{ message }}',
             ['message' => $message]
         );
     }
