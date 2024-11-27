@@ -19,6 +19,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Field\FkField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\ApiAware;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\Deprecated;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\Extension;
+use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\IgnoreInOpenapiSchema;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\Required;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\Runtime;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\Since;
@@ -252,6 +253,22 @@ class OpenApiDefinitionSchemaBuilder
         return $this->converter->denormalize($input);
     }
 
+    /**
+     * Ignore fields that are marked with the IgnoreInOpenapiSchema flag
+     * @param \Shopware\Core\Framework\DataAbstractionLayer\Field\Field $field
+     * @return bool
+     */
+    private function ignoreInOpenapiSchema(Field $field): bool
+    {
+        $flag = $field->getFlag(IgnoreInOpenapiSchema::class);
+
+        if ($flag === null) {
+            return false;
+        }
+
+        return true;
+    }
+
     private function shouldFieldBeIncluded(Field $field, bool $forSalesChannel): bool
     {
         if ($field->getPropertyName() === 'translations'
@@ -261,7 +278,7 @@ class OpenApiDefinitionSchemaBuilder
         }
 
         $flag = $field->getFlag(ApiAware::class);
-        if ($flag === null) {
+        if ($flag === null || $this->ignoreInOpenapiSchema($field)) {
             return false;
         }
 
