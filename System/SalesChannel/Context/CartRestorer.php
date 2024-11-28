@@ -55,7 +55,7 @@ class CartRestorer
             $customerContext = $this->replaceContextToken($customerId, $customerContext, $token);
         }
 
-        return $this->enrichCustomerContext($customerContext, $currentContext, $token, $customerId);
+        return $this->enrichCustomerContext($customerContext, $currentContext, $currentContext->getToken(), $customerId);
     }
 
     /**
