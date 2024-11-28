@@ -67,7 +67,7 @@ class ServiceClientFactory
         return new AuthenticatedServiceClient(
             $authClient,
             $entry,
-            $this->appPayloadServiceHelper->buildSource($app->getVersion())
+            $this->appPayloadServiceHelper->buildSource($app->getVersion(), $app->getId())
         );
     }
 

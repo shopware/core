@@ -46,7 +46,7 @@ class AppActionLoader
         \assert($app !== null);
 
         try {
-            $source = $this->appPayloadServiceHelper->buildSource($app->getVersion());
+            $source = $this->appPayloadServiceHelper->buildSource($app->getVersion(), $app->getId());
         } catch (AppUrlChangeDetectedException) {
             throw AppException::actionNotFound();
         }

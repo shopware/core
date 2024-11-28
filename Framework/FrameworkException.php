@@ -18,6 +18,8 @@ class FrameworkException extends HttpException
 
     private const INVALID_COMPRESSION_METHOD = 'FRAMEWORK__INVALID_COMPRESSION_METHOD';
     private const EXTENSION_RESULT_NOT_SET = 'FRAMEWORK__EXTENSION_RESULT_NOT_SET';
+    private const VALIDATION_FAILED = 'FRAMEWORK__VALIDATION_FAILED';
+    private const CLASS_NOT_FOUND = 'FRAMEWORK__CLASS_NOT_FOUND';
 
     public static function projectDirNotExists(string $dir, ?\Throwable $e = null): self
     {
@@ -73,6 +75,24 @@ class FrameworkException extends HttpException
             Response::HTTP_INTERNAL_SERVER_ERROR,
             self::INVALID_ARGUMENT,
             $message
+        );
+    }
+
+    public static function validationFailed(string $message): self
+    {
+        return new self(
+            Response::HTTP_INTERNAL_SERVER_ERROR,
+            self::VALIDATION_FAILED,
+            $message
+        );
+    }
+
+    public static function classNotFound(string $class): self
+    {
+        return new self(
+            Response::HTTP_INTERNAL_SERVER_ERROR,
+            self::CLASS_NOT_FOUND,
+            'Class not found: ' . $class
         );
     }
 }

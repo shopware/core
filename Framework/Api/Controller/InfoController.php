@@ -18,6 +18,7 @@ use Shopware\Core\Framework\Increment\Exception\IncrementGatewayNotFoundExceptio
 use Shopware\Core\Framework\Increment\IncrementGatewayRegistry;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Plugin;
+use Shopware\Core\Framework\Store\InAppPurchase;
 use Shopware\Core\Kernel;
 use Shopware\Core\Maintenance\Staging\Event\SetupStagingEvent;
 use Shopware\Core\Maintenance\System\Service\AppUrlVerifier;
@@ -54,7 +55,8 @@ class InfoController extends AbstractController
         private readonly RouterInterface $router,
         private readonly FlowActionCollector $flowActionCollector,
         private readonly SystemConfigService $systemConfigService,
-        private readonly ApiRouteInfoResolver $apiRouteInfoResolver
+        private readonly ApiRouteInfoResolver $apiRouteInfoResolver,
+        private readonly InAppPurchase $inAppPurchase,
     ) {
     }
 
@@ -212,6 +214,7 @@ class InfoController extends AbstractController
                 'enableStagingMode' => $this->params->get('shopware.staging.administration.show_banner') && $this->systemConfigService->getBool(SetupStagingEvent::CONFIG_FLAG),
                 'disableExtensionManagement' => !$this->params->get('shopware.deployment.runtime_extension_management'),
             ],
+            'inAppPurchases' => $this->inAppPurchase->all(),
         ]);
     }
 
