@@ -255,8 +255,6 @@ class OpenApiDefinitionSchemaBuilder
 
     /**
      * Ignore fields that are marked with the IgnoreInOpenapiSchema flag
-     * @param \Shopware\Core\Framework\DataAbstractionLayer\Field\Field $field
-     * @return bool
      */
     private function ignoreInOpenapiSchema(Field $field): bool
     {
