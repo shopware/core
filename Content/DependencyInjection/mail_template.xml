@@ -52,7 +52,7 @@
         </service>
 
         <service id="Shopware\Core\Content\Mail\Service\MailSender" public="true">
-            <argument type="service" id="messenger.bus.shopware"/>
+            <argument type="service" id="messenger.default_bus"/>
             <argument type="service" id="shopware.filesystem.private"/>
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
             <argument>%shopware.mail.max_body_length%</argument>
