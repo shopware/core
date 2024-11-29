@@ -65,7 +65,7 @@
             <argument type="service" id="Shopware\Core\Framework\Validation\DataValidator" />
             <argument type="service" id="Shopware\Core\Content\ImportExport\ImportExportFactory"/>
             <argument type="service" id="Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry"/>
-            <argument type="service" id="messenger.bus.shopware"/>
+            <argument type="service" id="messenger.default_bus"/>
             <argument type="service" id="Shopware\Core\Content\ImportExport\Service\MappingService"/>
 
             <call method="setContainer">
@@ -233,7 +233,7 @@
         </service>
 
         <service id="Shopware\Core\Content\ImportExport\Message\ImportExportHandler" public="true">
-            <argument type="service" id="messenger.bus.shopware"/>
+            <argument type="service" id="messenger.default_bus"/>
             <argument type="service" id="Shopware\Core\Content\ImportExport\ImportExportFactory"/>
             <argument type="service" id="event_dispatcher"/>
             <tag name="messenger.message_handler" />
@@ -258,7 +258,7 @@
 
         <!-- Subscriber -->
         <service id="Shopware\Core\Content\ImportExport\Event\Subscriber\FileDeletedSubscriber">
-            <argument type="service" id="messenger.bus.shopware"/>
+            <argument type="service" id="messenger.default_bus"/>
 
             <tag name="kernel.event_subscriber"/>
         </service>

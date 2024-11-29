@@ -114,7 +114,7 @@
             <argument type="service" id="logger"/>
             <argument type="service" id="sales_channel.repository"/>
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
-            <argument type="service" id="messenger.bus.shopware"/>
+            <argument type="service" id="messenger.default_bus"/>
             <argument type="service" id="event_dispatcher"/>
 
             <tag name="messenger.message_handler"/>

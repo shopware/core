@@ -73,7 +73,7 @@
             <argument type="service" id="Shopware\Core\Framework\DataAbstractionLayer\Indexing\TreeUpdater"/>
             <argument type="service" id="Shopware\Core\Content\Category\DataAbstractionLayer\CategoryBreadcrumbUpdater"/>
             <argument type="service" id="event_dispatcher"/>
-            <argument type="service" id="messenger.bus.shopware"/>
+            <argument type="service" id="messenger.default_bus"/>
             <tag name="shopware.entity_indexer"/>
         </service>
 

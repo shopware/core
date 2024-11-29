@@ -64,7 +64,7 @@
             <argument type="service" id="Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory"/>
             <argument type="service" id="sales_channel.repository"/>
             <argument type="service" id="product_export.repository"/>
-            <argument type="service" id="messenger.bus.shopware"/>
+            <argument type="service" id="messenger.default_bus"/>
             <tag name="messenger.message_handler"/>
         </service>
 
@@ -73,7 +73,7 @@
             <argument type="service" id="Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory"/>
             <argument type="service" id="product_export.repository"/>
             <argument type="service" id="Shopware\Core\Content\ProductExport\Service\ProductExportFileHandler"/>
-            <argument type="service" id="messenger.bus.shopware"/>
+            <argument type="service" id="messenger.default_bus"/>
             <argument type="service" id="Shopware\Core\Content\ProductExport\Service\ProductExportRenderer"/>
             <argument type="service" id="Shopware\Core\Framework\Adapter\Translation\Translator"/>
             <argument type="service" id="Shopware\Core\System\SalesChannel\Context\SalesChannelContextService"/>
