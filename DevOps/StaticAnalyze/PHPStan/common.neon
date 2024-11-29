@@ -9,6 +9,8 @@ parameters:
     treatPhpDocTypesAsCertain: false
     inferPrivatePropertyTypeFromConstructor: true
     reportUnmatchedIgnoredErrors: true
+    checkFunctionNameCase: true
+    checkInternalClassCaseSensitivity: true
 
     type_perfect:
         no_mixed_property: true
