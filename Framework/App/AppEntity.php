@@ -38,13 +38,6 @@ class AppEntity extends Entity
      *
      * @deprecated tag:v6.7.0 - Will be natively typed
      */
-    protected $id;
-
-    /**
-     * @var string
-     *
-     * @deprecated tag:v6.7.0 - Will be natively typed
-     */
     protected $name;
 
     /**
@@ -99,6 +92,8 @@ class AppEntity extends Entity
     protected ?string $baseAppUrl = null;
 
     protected ?string $checkoutGatewayUrl = null;
+
+    protected ?string $inAppPurchasesGatewayUrl = null;
 
     /**
      * @var list<Module>
@@ -310,16 +305,6 @@ class AppEntity extends Entity
 
     protected bool $selfManaged = false;
 
-    public function getId(): string
-    {
-        return $this->id;
-    }
-
-    public function setId(string $id): void
-    {
-        $this->id = $id;
-    }
-
     public function getName(): string
     {
         return $this->name;
@@ -411,6 +396,16 @@ class AppEntity extends Entity
     public function setCheckoutGatewayUrl(?string $checkoutGatewayUrl): void
     {
         $this->checkoutGatewayUrl = $checkoutGatewayUrl;
+    }
+
+    public function getInAppPurchasesGatewayUrl(): ?string
+    {
+        return $this->inAppPurchasesGatewayUrl;
+    }
+
+    public function setInAppPurchasesGatewayUrl(?string $inAppPurchasesGatewayUrl): void
+    {
+        $this->inAppPurchasesGatewayUrl = $inAppPurchasesGatewayUrl;
     }
 
     /**

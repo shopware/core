@@ -4,12 +4,16 @@ namespace Shopware\Core\Framework\App\Payload;
 
 use Shopware\Core\Framework\Api\Serializer\JsonEntityEncoder;
 use Shopware\Core\Framework\App\AppEntity;
+use Shopware\Core\Framework\App\AppException;
 use Shopware\Core\Framework\App\Exception\AppUrlChangeDetectedException;
+use Shopware\Core\Framework\App\Hmac\Guzzle\AuthMiddleware;
 use Shopware\Core\Framework\App\ShopId\ShopIdProvider;
+use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry;
 use Shopware\Core\Framework\DataAbstractionLayer\Entity;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Log\Package;
+use Shopware\Core\Framework\Store\InAppPurchase;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 
 /**
@@ -25,6 +29,7 @@ class AppPayloadServiceHelper
         private readonly DefinitionInstanceRegistry $definitionRegistry,
         private readonly JsonEntityEncoder $entityEncoder,
         private readonly ShopIdProvider $shopIdProvider,
+        private readonly InAppPurchase $inAppPurchase,
         private readonly string $shopUrl,
     ) {
     }
@@ -38,6 +43,7 @@ class AppPayloadServiceHelper
             $this->shopUrl,
             $this->shopIdProvider->getShopId(),
             $app->getVersion(),
+            $this->inAppPurchase->getByExtension($app->getId()),
         );
     }
 
@@ -71,6 +77,40 @@ class AppPayloadServiceHelper
         }
 
         return $array;
+    }
+
+    /**
+     * @param array{timeout?: int} $additionalOptions
+     */
+    public function createRequestOptions(
+        SourcedPayloadInterface $payload,
+        AppEntity $app,
+        Context $context,
+        array $additionalOptions = []
+    ): AppPayloadStruct {
+        if (!$app->getAppSecret()) {
+            throw AppException::registrationFailed($app->getName(), 'App secret is missing');
+        }
+
+        $defaultOptions = [
+            AuthMiddleware::APP_REQUEST_CONTEXT => $context,
+            AuthMiddleware::APP_REQUEST_TYPE => [
+                AuthMiddleware::APP_SECRET => $app->getAppSecret(),
+                AuthMiddleware::VALIDATED_RESPONSE => true,
+            ],
+            'headers' => ['Content-Type' => 'application/json'],
+            'body' => $this->buildPayload($payload, $app),
+        ];
+
+        return new AppPayloadStruct(\array_merge($defaultOptions, $additionalOptions));
+    }
+
+    private function buildPayload(SourcedPayloadInterface $payload, AppEntity $app): string
+    {
+        $payload->setSource($this->buildSource($app));
+        $encoded = $this->encode($payload);
+
+        return \json_encode($encoded, \JSON_THROW_ON_ERROR);
     }
 
     /**

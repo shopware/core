@@ -40,7 +40,11 @@ class PaymentPayloadService
         string $responseClass,
         Context $context
     ): AbstractResponse {
-        $optionRequest = $this->getRequestOptions($payload, $app, $context);
+        $optionRequest = $this->getRequestOptions(
+            $payload,
+            $app,
+            $context,
+        );
 
         $response = $this->client->request('POST', $url, $optionRequest);
 
