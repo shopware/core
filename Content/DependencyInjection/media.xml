@@ -97,7 +97,7 @@
             <argument type="service" id="Shopware\Core\Content\Media\Thumbnail\ThumbnailService"/>
             <argument type="service" id="Shopware\Core\Content\Media\Metadata\MetadataLoader"/>
             <argument type="service" id="Shopware\Core\Content\Media\TypeDetector\TypeDetector"/>
-            <argument type="service" id="messenger.bus.shopware" />
+            <argument type="service" id="messenger.default_bus" />
             <argument type="service" id="event_dispatcher" />
             <argument type="service" id="Shopware\Core\Content\Media\Core\Application\MediaLocationBuilder" />
             <argument type="service" id="Shopware\Core\Content\Media\Core\Application\AbstractMediaPathStrategy" />
@@ -130,7 +130,7 @@
             <argument type="service" id="Shopware\Core\Content\Media\Thumbnail\ThumbnailService"/>
             <argument type="service" id="media.repository"/>
             <argument type="service" id="media_folder.repository"/>
-            <argument type="service" id="messenger.bus.shopware"/>
+            <argument type="service" id="messenger.default_bus"/>
             <argument>%shopware.media.remote_thumbnails.enable%</argument>
 
             <tag name="console.command"/>
@@ -316,7 +316,7 @@
         <service id="Shopware\Core\Content\Media\Subscriber\MediaDeletionSubscriber">
             <argument type="service" id="event_dispatcher"/>
             <argument type="service" id="media_thumbnail.repository"/>
-            <argument type="service" id="messenger.bus.shopware"/>
+            <argument type="service" id="messenger.default_bus"/>
             <argument type="service" id="Shopware\Core\Content\Media\Message\DeleteFileHandler"/>
             <argument type="service" id="Doctrine\DBAL\Connection"/>
             <argument type="service" id="media.repository"/>

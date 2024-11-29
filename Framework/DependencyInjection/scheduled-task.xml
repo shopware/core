@@ -11,7 +11,7 @@
 
         <service id="Shopware\Core\Framework\MessageQueue\ScheduledTask\Scheduler\TaskScheduler">
             <argument type="service" id="scheduled_task.repository"/>
-            <argument type="service" id="messenger.bus.shopware"/>
+            <argument type="service" id="messenger.default_bus"/>
             <argument type="service" id="parameter_bag"/>
         </service>
 
