@@ -37,13 +37,13 @@ class AppPayloadServiceHelper
     /**
      * @throws AppUrlChangeDetectedException
      */
-    public function buildSource(string $appVersion, string $appId): Source
+    public function buildSource(string $appVersion, string $appName): Source
     {
         return new Source(
             $this->shopUrl,
             $this->shopIdProvider->getShopId(),
             $appVersion,
-            $this->inAppPurchase->getByExtension($appId),
+            $this->inAppPurchase->getJWTByExtension($appName),
         );
     }
 
@@ -107,7 +107,7 @@ class AppPayloadServiceHelper
 
     private function buildPayload(SourcedPayloadInterface $payload, AppEntity $app): string
     {
-        $payload->setSource($this->buildSource($app->getVersion(), $app->getId()));
+        $payload->setSource($this->buildSource($app->getVersion(), $app->getName()));
         $encoded = $this->encode($payload);
 
         return \json_encode($encoded, \JSON_THROW_ON_ERROR);

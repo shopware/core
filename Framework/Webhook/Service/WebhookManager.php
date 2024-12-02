@@ -261,7 +261,7 @@ class WebhookManager implements ResetInterface
         if ($webhook['appId'] !== null && $webhook['appVersion'] !== null) {
             $source = \array_merge(
                 $source,
-                $this->appPayloadServiceHelper->buildSource($webhook['appVersion'], $webhook['appId'])->jsonSerialize()
+                $this->appPayloadServiceHelper->buildSource($webhook['appVersion'], $webhook['appName'] ?? '')->jsonSerialize()
             );
         }
 
