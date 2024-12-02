@@ -55,7 +55,7 @@ class AppJWTGenerateRoute
             ->canOnlyBeUsedAfter(new \DateTimeImmutable())
             ->expiresAt($expiration);
 
-        $builder = $builder->withClaim('inAppPurchases', $this->inAppPurchase->getByExtension($name));
+        $builder = $builder->withClaim('inAppPurchases', $this->inAppPurchase->getJWTByExtension($name));
 
         if (\in_array('sales_channel:read', $privileges, true)) {
             $builder = $builder->withClaim('salesChannelId', $context->getSalesChannel()->getId());
