@@ -253,20 +253,6 @@ class OpenApiDefinitionSchemaBuilder
         return $this->converter->denormalize($input);
     }
 
-    /**
-     * Ignore fields that are marked with the IgnoreInOpenapiSchema flag
-     */
-    private function ignoreInOpenapiSchema(Field $field): bool
-    {
-        $flag = $field->getFlag(IgnoreInOpenapiSchema::class);
-
-        if ($flag === null) {
-            return false;
-        }
-
-        return true;
-    }
-
     private function shouldFieldBeIncluded(Field $field, bool $forSalesChannel): bool
     {
         if ($field->getPropertyName() === 'translations'
@@ -275,8 +261,13 @@ class OpenApiDefinitionSchemaBuilder
             return false;
         }
 
+        $ignoreOpenApiSchemaFlag = $field->getFlag(IgnoreInOpenapiSchema::class);
+        if ($ignoreOpenApiSchemaFlag !== null) {
+            return false;
+        }
+
         $flag = $field->getFlag(ApiAware::class);
-        if ($flag === null || $this->ignoreInOpenapiSchema($field)) {
+        if ($flag === null) {
             return false;
         }
 
