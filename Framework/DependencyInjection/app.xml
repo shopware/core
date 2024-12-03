@@ -46,7 +46,7 @@
         </service>
 
         <service id="Shopware\Core\Framework\App\Validation\ManifestValidator">
-            <argument type="tagged" tag="shopware.app_manifest.validator"/>
+            <argument type="tagged_iterator" tag="shopware.app_manifest.validator"/>
         </service>
 
         <service id="Shopware\Core\Framework\App\Validation\ConfigValidator">
@@ -476,7 +476,7 @@
         </service>
 
         <service id="Shopware\Core\Framework\App\AppUrlChangeResolver\Resolver" public="true">
-            <argument type="tagged" tag="shopware.app_url_changed_resolver"/>
+            <argument type="tagged_iterator" tag="shopware.app_url_changed_resolver"/>
         </service>
 
         <service id="Shopware\Core\Framework\App\AppUrlChangeResolver\MoveShopPermanentlyStrategy">

@@ -106,7 +106,7 @@
         </service>
 
         <service id="Shopware\Core\Checkout\Document\Renderer\DocumentRendererRegistry">
-            <argument type="tagged" tag="document.renderer"/>
+            <argument type="tagged_iterator" tag="document.renderer"/>
         </service>
 
         <service id="Shopware\Core\Checkout\Document\Service\PdfRenderer">

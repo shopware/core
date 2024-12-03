@@ -203,6 +203,7 @@ class Kernel extends HttpKernel
             \assert(\is_string($trustedProxies) || \is_array($trustedProxies));
             $trustedHeaderSet = $container->getParameter('kernel.trusted_headers');
             \assert(\is_int($trustedHeaderSet));
+            /** @phpstan-ignore argument.type (verifying bitmask of $trustedHeaderSet is no easy task) */
             Request::setTrustedProxies(\is_array($trustedProxies) ? $trustedProxies : array_map('trim', explode(',', $trustedProxies)), $trustedHeaderSet);
         }
 
