@@ -191,6 +191,9 @@ class OrderException extends HttpException
         );
     }
 
+    /**
+     * The {@see CustomerDeletedException} is a flow exception and should not be converted to a real domain exception
+     */
     public static function orderCustomerDeleted(string $orderId): CustomerDeletedException
     {
         return new CustomerDeletedException($orderId);

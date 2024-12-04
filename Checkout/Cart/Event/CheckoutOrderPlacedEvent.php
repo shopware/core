@@ -15,6 +15,7 @@ use Shopware\Core\Framework\Event\FlowEventAware;
 use Shopware\Core\Framework\Event\MailAware;
 use Shopware\Core\Framework\Event\OrderAware;
 use Shopware\Core\Framework\Event\SalesChannelAware;
+use Shopware\Core\Framework\Feature;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Script\Execution\Awareness\SalesChannelContextAware;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
@@ -26,17 +27,22 @@ class CheckoutOrderPlacedEvent extends Event implements SalesChannelAware, Sales
     final public const EVENT_NAME = 'checkout.order.placed';
 
     /**
-     * @deprecated tag:v6.7.0 - Parameter $context will be typed as SalesChannelContext
+     * @deprecated tag:v6.7.0 - Parameter $context will be type of SalesChannelContext and readonly
      * @deprecated tag:v6.7.0 - Parameter $salesChannelId will be removed
-     * @deprecated tag:v6.7.0 - Parameter $salesChannelContext will be removed
      */
     public function __construct(
-        private readonly Context $context,
+        private Context|SalesChannelContext $context,
         private readonly OrderEntity $order,
-        private readonly string $salesChannelId,
-        private ?MailRecipientStruct $mailRecipientStruct = null,
-        private readonly ?SalesChannelContext $salesChannelContext = null
+        private readonly string $salesChannelId = '',
+        private ?MailRecipientStruct $mailRecipientStruct = null
     ) {
+        if ($context instanceof Context) {
+            Feature::triggerDeprecationOrThrow('v6.7.0.0', 'The parameter $context will be type of SalesChannelContext');
+
+            if (!$salesChannelId) {
+                Feature::throwException('v6.7.0.0', 'The parameter $salesChannelId is required when passing Context');
+            }
+        }
     }
 
     public function getName(): string
@@ -62,16 +68,23 @@ class CheckoutOrderPlacedEvent extends Event implements SalesChannelAware, Sales
 
     public function getContext(): Context
     {
-        return $this->context;
+        /**
+         * @deprecated tag:v6.7.0 - Will be removed
+         */
+        if ($this->context instanceof Context) {
+            return $this->context;
+        }
+
+        return $this->context->getContext();
     }
 
     public function getSalesChannelContext(): SalesChannelContext
     {
-        if ($this->salesChannelContext === null) {
+        if ($this->context instanceof Context) {
             throw CartException::missingSalesChannelContext();
         }
 
-        return $this->salesChannelContext;
+        return $this->context;
     }
 
     public function getMailStruct(): MailRecipientStruct
@@ -87,16 +100,16 @@ class CheckoutOrderPlacedEvent extends Event implements SalesChannelAware, Sales
 
     public function getSalesChannelId(): string
     {
-        return $this->salesChannelId;
+        if ($this->context instanceof Context) {
+            return $this->salesChannelId;
+        }
+
+        return $this->context->getSalesChannelId();
     }
 
     public function getCustomerId(): string
     {
         $customerId = $this->getOrder()->getOrderCustomer()?->getCustomerId();
-
-        if (!$customerId && $this->salesChannelContext) {
-            $customerId = $this->salesChannelContext->getCustomerId();
-        }
 
         if (!$customerId) {
             throw CartException::orderCustomerDeleted($this->getOrderId());
@@ -107,16 +120,19 @@ class CheckoutOrderPlacedEvent extends Event implements SalesChannelAware, Sales
 
     public function getCustomerGroupId(): string
     {
-        $customerGroupId = $this->getOrder()->getOrderCustomer()?->getCustomer()?->getGroupId();
+        /**
+         * @deprecated tag:v6.7.0 - Will be removed
+         */
+        if ($this->context instanceof Context) {
+            $customerGroupId = $this->getOrder()->getOrderCustomer()?->getCustomer()?->getGroupId();
 
-        if (!$customerGroupId && $this->salesChannelContext) {
-            $customerGroupId = $this->salesChannelContext->getCustomerGroupId();
+            if (!$customerGroupId) {
+                throw CartException::orderCustomerDeleted($this->getOrderId());
+            }
+
+            return $customerGroupId;
         }
 
-        if (!$customerGroupId) {
-            throw CartException::orderCustomerDeleted($this->getOrderId());
-        }
-
-        return $customerGroupId;
+        return $this->context->getCustomerGroupId();
     }
 }
