@@ -16,6 +16,8 @@ class FrameworkException extends HttpException
 
     private const INVALID_ARGUMENT = 'FRAMEWORK__INVALID_ARGUMENT';
 
+    private const INVALID_COLLECTION_ELEMENT_TYPE = 'FRAMEWORK__INVALID_COLLECTION_ELEMENT_TYPE';
+
     private const INVALID_COMPRESSION_METHOD = 'FRAMEWORK__INVALID_COMPRESSION_METHOD';
     private const EXTENSION_RESULT_NOT_SET = 'FRAMEWORK__EXTENSION_RESULT_NOT_SET';
     private const VALIDATION_FAILED = 'FRAMEWORK__VALIDATION_FAILED';
@@ -93,6 +95,25 @@ class FrameworkException extends HttpException
             Response::HTTP_INTERNAL_SERVER_ERROR,
             self::CLASS_NOT_FOUND,
             'Class not found: ' . $class
+        );
+    }
+
+    /**
+     * @deprecated tag:v6.7.0 - reason:return-type-change - Will only return 'self' in the future
+     */
+    public static function collectionElementInvalidType(string $expectedClass, string $elementClass): self|\InvalidArgumentException
+    {
+        if (!Feature::isActive('v6.7.0.0')) {
+            return new \InvalidArgumentException(
+                \sprintf('Expected collection element of type %s got %s', $expectedClass, $elementClass)
+            );
+        }
+
+        return new self(
+            Response::HTTP_INTERNAL_SERVER_ERROR,
+            self::INVALID_COLLECTION_ELEMENT_TYPE,
+            'Expected collection element of type {{ expected }} got {{ element }}',
+            ['expected' => $expectedClass, 'element' => $elementClass]
         );
     }
 }
