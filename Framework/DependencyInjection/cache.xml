@@ -105,6 +105,8 @@
             <argument type="service" id="Doctrine\DBAL\Connection"/>
             <argument>%shopware.cache.tagging.each_snippet%</argument>
             <argument>%shopware.cache.tagging.each_config%</argument>
+            <argument>%shopware.product_stream.indexing%</argument>
+
             <tag name="kernel.event_listener" event="Shopware\Core\Content\Category\Event\CategoryIndexerEvent" method="invalidateCategoryRouteByCategoryIds" priority="2000" />
             <tag name="kernel.event_listener" event="Shopware\Core\Content\Category\Event\CategoryIndexerEvent" method="invalidateListingRouteByCategoryIds" priority="2001" />
             <tag name="kernel.event_listener" event="Shopware\Core\Content\LandingPage\Event\LandingPageIndexerEvent" method="invalidateIndexedLandingPages" priority="2000" />

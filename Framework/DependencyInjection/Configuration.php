@@ -52,6 +52,7 @@ class Configuration implements ConfigurationInterface
                 ->append($this->createSearchSection())
                 ->append($this->createTelemetrySection())
                 ->append($this->createRedisSection())
+                ->append($this->createProductStreamSection())
             ->end();
 
         return $treeBuilder;
@@ -1027,6 +1028,19 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
+            ->end();
+
+        return $rootNode;
+    }
+
+    private function createProductStreamSection(): ArrayNodeDefinition
+    {
+        $treeBuilder = new TreeBuilder('product_stream');
+        $rootNode = $treeBuilder->getRootNode();
+
+        $rootNode
+            ->children()
+                ->booleanNode('indexing')->defaultTrue()->end()
             ->end();
 
         return $rootNode;

@@ -82,7 +82,8 @@ class CacheInvalidationSubscriber
         private readonly CacheInvalidator $cacheInvalidator,
         private readonly Connection $connection,
         private readonly bool $fineGrainedCacheSnippet,
-        private readonly bool $fineGrainedCacheConfig
+        private readonly bool $fineGrainedCacheConfig,
+        private readonly bool $productStreamIndexerEnabled,
     ) {
     }
 
@@ -961,6 +962,10 @@ class CacheInvalidationSubscriber
      */
     private function getStreamIds(array $ids): array
     {
+        if (!$this->productStreamIndexerEnabled) {
+            return [];
+        }
+
         return $this->connection->fetchFirstColumn(
             'SELECT DISTINCT LOWER(HEX(product_stream_id))
              FROM product_stream_mapping
