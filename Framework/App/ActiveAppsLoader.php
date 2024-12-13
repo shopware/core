@@ -35,6 +35,7 @@ class ActiveAppsLoader implements ResetInterface
      */
     public function getActiveApps(): array
     {
+        // @deprecated tag:v6.7.0 - remove if condition
         if (EnvironmentHelper::getVariable('DISABLE_EXTENSIONS', false)) {
             return [];
         }
