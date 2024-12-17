@@ -2,6 +2,8 @@
 
 namespace Shopware\Core\Content\Mail;
 
+use Shopware\Core\Content\MailTemplate\Exception\MailTransportFailedException;
+use Shopware\Core\Framework\Feature;
 use Shopware\Core\Framework\HttpException;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\ShopwareHttpException;
@@ -17,6 +19,8 @@ class MailException extends HttpException
     final public const MAIL_BODY_TOO_LONG = 'MAIL__MAIL_BODY_TOO_LONG';
 
     final public const MAIL_TEMPLATE_NOT_FOUND = 'MAIL_TEMPLATE_NOT_FOUND';
+
+    final public const MAIL_TRANSPORT_FAILED = 'CONTENT__MAIL_TRANSPORT_FAILED';
 
     /**
      * @param string[] $validOptions
@@ -58,6 +62,20 @@ class MailException extends HttpException
             self::MAIL_TEMPLATE_NOT_FOUND,
             'Mail template with id {id} not found',
             ['id' => $mailTemplateId]
+        );
+    }
+
+    public static function mailTransportFailedException(?\Throwable $e = null): self|MailTransportFailedException
+    {
+        if (!Feature::isActive('v6.7.0.0')) {
+            return new MailTransportFailedException([], $e);
+        }
+
+        return new self(
+            Response::HTTP_BAD_REQUEST,
+            self::MAIL_TRANSPORT_FAILED,
+            'Failed sending mail with Error: {{ errorMessage }}',
+            ['errorMessage' => $e ? $e->getMessage() : 'Unknown error']
         );
     }
 }
