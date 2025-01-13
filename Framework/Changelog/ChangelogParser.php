@@ -41,6 +41,10 @@ class ChangelogParser
 
     private function findIssueIdInCommit(string $path, string $rootDir): ?string
     {
+        if ($_ENV['CI'] ?? false) {
+            return null;
+        }
+        
         $cmd = 'cd ' . escapeshellarg($rootDir) . ' && git log -- ' . escapeshellarg($path);
         $output = \shell_exec($cmd);
 
