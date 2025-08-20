@@ -16,10 +16,12 @@ class MailerConfigurationCompilerPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container): void
     {
-        $container->getDefinition('mailer.default_transport')->setFactory([
-            new Reference(MailerTransportLoader::class),
-            'fromString',
-        ]);
+        if ($container->hasDefinition('mailer.default_transport')) {
+            $container->getDefinition('mailer.default_transport')->setFactory([
+                new Reference(MailerTransportLoader::class),
+                'fromString',
+            ]);
+        }
 
         $container->getDefinition('mailer.transports')->setFactory([
             new Reference(MailerTransportLoader::class),
