@@ -73,7 +73,7 @@ class SendPasswordRecoveryMailRoute extends AbstractSendPasswordRecoveryMailRout
         try {
             $customer = $this->getCustomerByEmail($data->get('email'), $context);
         } catch (CustomerException) {
-            return new SuccessResponse();
+            return new CustomerNotFoundException($data->get('email'));
         }
 
         $customerId = $customer->getId();
