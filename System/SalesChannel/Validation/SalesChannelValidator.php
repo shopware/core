@@ -110,8 +110,10 @@ class SalesChannelValidator implements EventSubscriberInterface
             return;
         }
 
+        $id = Uuid::fromBytesToHex($command->getPrimaryKey()['id']);
+        \assert(\array_key_exists($id, $mapping));
+
         if ($command instanceof UpdateCommand) {
-            $id = Uuid::fromBytesToHex($command->getPrimaryKey()['id']);
             $mapping[$id]['updateId'] = Uuid::fromBytesToHex($command->getPayload()['language_id']);
 
             return;
@@ -121,7 +123,6 @@ class SalesChannelValidator implements EventSubscriberInterface
             return;
         }
 
-        $id = Uuid::fromBytesToHex($command->getPrimaryKey()['id']);
         $mapping[$id]['new_default'] = Uuid::fromBytesToHex($command->getPayload()['language_id']);
         $mapping[$id]['inserts'] = [];
         $mapping[$id]['state'] = [];
@@ -142,6 +143,7 @@ class SalesChannelValidator implements EventSubscriberInterface
     {
         $language = Uuid::fromBytesToHex($command->getPrimaryKey()['language_id']);
         $id = Uuid::fromBytesToHex($command->getPrimaryKey()['sales_channel_id']);
+        \assert(\array_key_exists($id, $mapping));
         $mapping[$id]['state'] = [];
 
         if ($command instanceof DeleteCommand) {
@@ -351,11 +353,11 @@ class SalesChannelValidator implements EventSubscriberInterface
     /**
      * @param array<string> $salesChannelIds
      *
-     * @return array<string, string>
+     * @return list<array<string, string>>
      */
     private function fetchCurrentLanguageStates(array $salesChannelIds): array
     {
-        /** @var array<string, mixed> $result */
+        /** @var list<array<string, mixed>> $result */
         $result = $this->connection->fetchAllAssociative(
             'SELECT LOWER(HEX(sales_channel.id)) AS sales_channel_id,
             LOWER(HEX(sales_channel.language_id)) AS current_default,
@@ -373,7 +375,7 @@ class SalesChannelValidator implements EventSubscriberInterface
 
     /**
      * @param array<string, mixed> $mapping
-     * @param array<string, mixed> $states
+     * @param list<array<string, mixed>> $states
      *
      * @return array<string, mixed>
      */
