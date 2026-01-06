@@ -3,8 +3,7 @@
 namespace Shopware\Core\Checkout\Cart\Rule;
 
 use Shopware\Core\Checkout\Cart\LineItem\LineItem;
-use Shopware\Core\Content\Product\State;
-use Shopware\Core\Framework\Feature;
+use Shopware\Core\Content\Product\ProductTypeRegistry;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Rule\Rule;
 use Shopware\Core\Framework\Rule\RuleComparison;
@@ -14,22 +13,25 @@ use Shopware\Core\Framework\Rule\RuleScope;
 use Symfony\Component\Validator\Constraint;
 
 /**
- * @deprecated tag:v6.8.0 - reason:remove-rule - Use \Shopware\Core\Checkout\Cart\Rule\LineItemProductTypeRule instead.
- *
- * @codeCoverageIgnore
+ * @final
  */
 #[Package('fundamentals@after-sales')]
-class LineItemProductStatesRule extends Rule
+class LineItemProductTypeRule extends Rule
 {
-    final public const RULE_NAME = 'cartLineItemProductStates';
+    final public const RULE_NAME = 'cartLineItemProductType';
 
-    protected string $productState;
+    protected string $productType;
 
     protected string $operator;
 
     /**
-     * @deprecated tag:v6.8.0 - reason:remove-rule - Will be removed, as product states are deprecated.
+     * @internal
      */
+    public function __construct(private readonly ProductTypeRegistry $productTypeRegistry)
+    {
+        parent::__construct();
+    }
+
     public function match(RuleScope $scope): bool
     {
         if ($scope instanceof LineItemScope) {
@@ -51,41 +53,34 @@ class LineItemProductStatesRule extends Rule
 
     /**
      * @return array<string, array<int, Constraint>>
-     *
-     * @deprecated tag:v6.8.0 - reason:remove-rule - Will be removed, as product states are deprecated.
      */
     public function getConstraints(): array
     {
         return [
             'operator' => RuleConstraints::stringOperators(false),
-            'productState' => RuleConstraints::choice([
-                State::IS_PHYSICAL,
-                State::IS_DOWNLOAD,
-            ]),
+            'productType' => RuleConstraints::choice($this->productTypeRegistry->getTypes()),
         ];
     }
 
-    /**
-     * @deprecated tag:v6.8.0 - reason:remove-rule - Will be removed, as product states are deprecated.
-     */
     public function getConfig(): RuleConfig
     {
         return (new RuleConfig())
             ->operatorSet(RuleConfig::OPERATOR_SET_STRING)
-            ->selectField('productState', [
-                State::IS_PHYSICAL,
-                State::IS_DOWNLOAD,
-            ]);
+            ->selectField('productType', $this->productTypeRegistry->getTypes());
     }
 
     private function lineItemMatches(LineItem $lineItem): bool
     {
-        $states = [];
+        if (!$lineItem->hasPayloadValue(LineItem::PAYLOAD_PRODUCT_TYPE)) {
+            return false;
+        }
 
-        Feature::callSilentIfInactive('v6.8.0.0', function () use (&$states, $lineItem): void {
-            $states = $lineItem->getStates();
-        });
+        $resolvedType = $lineItem->getPayloadValue(LineItem::PAYLOAD_PRODUCT_TYPE);
 
-        return RuleComparison::stringArray($this->productState, array_values($states), $this->operator);
+        if (!\is_string($resolvedType)) {
+            return false;
+        }
+
+        return RuleComparison::string($resolvedType, $this->productType, $this->operator);
     }
 }
