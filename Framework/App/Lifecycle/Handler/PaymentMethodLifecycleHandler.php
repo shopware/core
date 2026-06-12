@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Framework\App\Lifecycle\Persister;
+namespace Shopware\Core\Framework\App\Lifecycle\Handler;
 
 use League\MimeTypeDetection\FinfoMimeTypeDetector;
 use Shopware\Core\Checkout\Payment\PaymentMethodCollection;
@@ -9,8 +9,8 @@ use Shopware\Core\Checkout\Payment\PaymentMethodEntity;
 use Shopware\Core\Content\Media\MediaCollection;
 use Shopware\Core\Content\Media\MediaService;
 use Shopware\Core\Framework\App\Aggregate\AppPaymentMethod\AppPaymentMethodEntity;
-use Shopware\Core\Framework\App\AppEntity;
-use Shopware\Core\Framework\App\Lifecycle\AppLifecycleContext;
+use Shopware\Core\Framework\App\Lifecycle\Context\AppActivationContext;
+use Shopware\Core\Framework\App\Lifecycle\Context\AppPersistContext;
 use Shopware\Core\Framework\App\Manifest\Xml\PaymentMethod\PaymentMethod;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
@@ -24,7 +24,7 @@ use Shopware\Core\Framework\Util\Filesystem;
  * @internal only for use by the app-system
  */
 #[Package('framework')]
-class PaymentMethodPersister implements PersisterInterface
+class PaymentMethodLifecycleHandler extends AbstractLifecycleHandler
 {
     private readonly FinfoMimeTypeDetector $mimeDetector;
 
@@ -40,7 +40,27 @@ class PaymentMethodPersister implements PersisterInterface
         $this->mimeDetector = new FinfoMimeTypeDetector();
     }
 
-    public function persist(AppLifecycleContext $context): void
+    public function install(AppPersistContext $context): void
+    {
+        $this->persist($context);
+    }
+
+    public function update(AppPersistContext $context): void
+    {
+        $this->persist($context);
+    }
+
+    public function activate(AppActivationContext $context): void
+    {
+        $this->updateActiveState($context->app->getId(), $context->context, false, true);
+    }
+
+    public function deactivate(AppActivationContext $context): void
+    {
+        $this->updateActiveState($context->app->getId(), $context->context, true, false);
+    }
+
+    private function persist(AppPersistContext $context): void
     {
         if (!$context->hasAppSecret()) {
             return;
@@ -97,16 +117,6 @@ class PaymentMethodPersister implements PersisterInterface
         $this->deactivatePaymentMethods($existingPaymentMethods, $context->context);
     }
 
-    public function activate(AppEntity $app, Context $context): void
-    {
-        $this->updateActiveState($app->getId(), $context, false, true);
-    }
-
-    public function deactivate(AppEntity $app, Context $context): void
-    {
-        $this->updateActiveState($app->getId(), $context, true, false);
-    }
-
     private function deactivatePaymentMethods(PaymentMethodCollection $toBeDisabled, Context $context): void
     {
         $updates = array_reduce($toBeDisabled->getElements(), static function (array $acc, PaymentMethodEntity $paymentMethod): array {
@@ -131,7 +141,7 @@ class PaymentMethodPersister implements PersisterInterface
             return $acc;
         }, []);
 
-        if (empty($updates)) {
+        if ($updates === []) {
             return;
         }
 

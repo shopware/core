@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Framework\App\Lifecycle;
+namespace Shopware\Core\Framework\App\Lifecycle\Context;
 
 use Shopware\Core\Framework\App\AppEntity;
 use Shopware\Core\Framework\App\Manifest\Manifest;
@@ -14,7 +14,7 @@ use Shopware\Core\Framework\Util\Filesystem;
  * @internal only for use by the app-system
  */
 #[Package('framework')]
-final readonly class AppLifecycleContext
+final readonly class AppPersistContext
 {
     public function __construct(
         public Manifest $manifest,
@@ -25,7 +25,6 @@ final readonly class AppLifecycleContext
          */
         public Filesystem $appFilesystem,
         public string $defaultLocale,
-        public bool $isInstall,
     ) {
     }
 

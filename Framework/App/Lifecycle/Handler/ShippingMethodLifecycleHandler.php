@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Framework\App\Lifecycle\Persister;
+namespace Shopware\Core\Framework\App\Lifecycle\Handler;
 
 use League\MimeTypeDetection\FinfoMimeTypeDetector;
 use Shopware\Core\Checkout\Shipping\ShippingMethodCollection;
@@ -9,8 +9,7 @@ use Shopware\Core\Checkout\Shipping\ShippingMethodEntity;
 use Shopware\Core\Content\Media\MediaCollection;
 use Shopware\Core\Content\Media\MediaService;
 use Shopware\Core\Framework\App\Aggregate\AppShippingMethod\AppShippingMethodEntity;
-use Shopware\Core\Framework\App\AppEntity;
-use Shopware\Core\Framework\App\Lifecycle\AppLifecycleContext;
+use Shopware\Core\Framework\App\Lifecycle\Context\AppPersistContext;
 use Shopware\Core\Framework\App\Manifest\Xml\ShippingMethod\ShippingMethod;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityCollection;
@@ -24,7 +23,7 @@ use Shopware\Core\Framework\Util\Filesystem;
  * @internal only for use by the app-system
  */
 #[Package('framework')]
-class ShippingMethodPersister implements PersisterInterface
+class ShippingMethodLifecycleHandler extends AbstractLifecycleHandler
 {
     private readonly FinfoMimeTypeDetector $mimeDetector;
 
@@ -42,7 +41,17 @@ class ShippingMethodPersister implements PersisterInterface
         $this->mimeDetector = new FinfoMimeTypeDetector();
     }
 
-    public function persist(AppLifecycleContext $context): void
+    public function install(AppPersistContext $context): void
+    {
+        $this->persist($context);
+    }
+
+    public function update(AppPersistContext $context): void
+    {
+        $this->persist($context);
+    }
+
+    private function persist(AppPersistContext $context): void
     {
         $manifest = $context->manifest;
         $appId = $context->app->getId();
@@ -102,14 +111,6 @@ class ShippingMethodPersister implements PersisterInterface
         }
 
         $this->deactivateOldShippingMethods($existingShippingMethods, $context->context);
-    }
-
-    public function activate(AppEntity $app, Context $context): void
-    {
-    }
-
-    public function deactivate(AppEntity $app, Context $context): void
-    {
     }
 
     /**

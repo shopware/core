@@ -1,12 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Framework\App\Lifecycle\Persister;
+namespace Shopware\Core\Framework\App\Lifecycle\Handler;
 
 use Doctrine\DBAL\Connection;
 use Shopware\Core\Framework\App\Aggregate\FlowEvent\AppFlowEventCollection;
-use Shopware\Core\Framework\App\AppEntity;
 use Shopware\Core\Framework\App\Flow\Event\Event;
-use Shopware\Core\Framework\App\Lifecycle\AppLifecycleContext;
+use Shopware\Core\Framework\App\Lifecycle\Context\AppActivationContext;
+use Shopware\Core\Framework\App\Lifecycle\Context\AppPersistContext;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\Log\Package;
@@ -17,7 +17,7 @@ use Shopware\Core\Framework\Uuid\Uuid;
  * @internal only for use by the app-system
  */
 #[Package('framework')]
-class FlowEventPersister implements PersisterInterface
+class FlowEventLifecycleHandler extends AbstractLifecycleHandler
 {
     /**
      * @param EntityRepository<AppFlowEventCollection> $flowEventsRepository
@@ -28,17 +28,24 @@ class FlowEventPersister implements PersisterInterface
     ) {
     }
 
-    public function persist(AppLifecycleContext $context): void
+    public function install(AppPersistContext $context): void
     {
-        $flowEvents = $this->getFlowEvents($context->appFilesystem);
-
-        if ($flowEvents) {
-            $this->updateEvents($flowEvents, $context->app->getId(), $context->context, $context->defaultLocale);
-        }
+        $this->persist($context);
     }
 
-    public function activate(AppEntity $app, Context $context): void
+    public function update(AppPersistContext $context): void
     {
+        $this->persist($context);
+    }
+
+    public function deactivate(AppActivationContext $context): void
+    {
+        $this->connection->executeStatement(
+            'UPDATE `flow` SET `active` = false WHERE `event_name` IN (SELECT `name` FROM `app_flow_event` WHERE `app_id` = :appId);',
+            [
+                'appId' => Uuid::fromHexToBytes($context->app->getId()),
+            ],
+        );
     }
 
     public function updateEvents(Event $flowEvent, string $appId, Context $context, string $defaultLocale): void
@@ -70,14 +77,13 @@ class FlowEventPersister implements PersisterInterface
         $this->deleteOldAppFlowEvents($existingFlowEvents, $context);
     }
 
-    public function deactivate(AppEntity $app, Context $context): void
+    private function persist(AppPersistContext $context): void
     {
-        $this->connection->executeStatement(
-            'UPDATE `flow` SET `active` = false WHERE `event_name` IN (SELECT `name` FROM `app_flow_event` WHERE `app_id` = :appId);',
-            [
-                'appId' => Uuid::fromHexToBytes($app->getId()),
-            ],
-        );
+        $flowEvents = $this->getFlowEvents($context->appFilesystem);
+
+        if ($flowEvents) {
+            $this->updateEvents($flowEvents, $context->app->getId(), $context->context, $context->defaultLocale);
+        }
     }
 
     private function getFlowEvents(Filesystem $fs): ?Event

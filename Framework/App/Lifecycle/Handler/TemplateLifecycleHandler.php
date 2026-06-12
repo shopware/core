@@ -1,12 +1,13 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Framework\App\Lifecycle\Persister;
+namespace Shopware\Core\Framework\App\Lifecycle\Handler;
 
 use Shopware\Core\Framework\Adapter\Cache\CacheClearer;
 use Shopware\Core\Framework\App\AppCollection;
 use Shopware\Core\Framework\App\AppEntity;
 use Shopware\Core\Framework\App\AppException;
-use Shopware\Core\Framework\App\Lifecycle\AppLifecycleContext;
+use Shopware\Core\Framework\App\Lifecycle\Context\AppActivationContext;
+use Shopware\Core\Framework\App\Lifecycle\Context\AppPersistContext;
 use Shopware\Core\Framework\App\Template\AbstractTemplateLoader;
 use Shopware\Core\Framework\App\Template\TemplateCollection;
 use Shopware\Core\Framework\Context;
@@ -20,7 +21,7 @@ use Shopware\Core\Framework\Util\Hasher;
  * @internal only for use by the app-system
  */
 #[Package('framework')]
-class TemplatePersister implements PersisterInterface
+class TemplateLifecycleHandler extends AbstractLifecycleHandler
 {
     /**
      * @param EntityRepository<TemplateCollection> $templateRepository
@@ -34,7 +35,28 @@ class TemplatePersister implements PersisterInterface
     ) {
     }
 
-    public function persist(AppLifecycleContext $context): void
+    public function install(AppPersistContext $context): void
+    {
+        // on install the cache is cleared when the templates are activated, see self::updateActiveState()
+        $this->persist($context, clearCacheAfterChange: false);
+    }
+
+    public function update(AppPersistContext $context): void
+    {
+        $this->persist($context, clearCacheAfterChange: true);
+    }
+
+    public function activate(AppActivationContext $context): void
+    {
+        $this->updateActiveState($context->app->getId(), $context->context, false, true);
+    }
+
+    public function deactivate(AppActivationContext $context): void
+    {
+        $this->updateActiveState($context->app->getId(), $context->context, true, false);
+    }
+
+    private function persist(AppPersistContext $context, bool $clearCacheAfterChange): void
     {
         $app = $this->getAppWithExistingTemplates($context->app->getId(), $context->context);
         $existingTemplates = $app->getTemplates();
@@ -88,25 +110,9 @@ class TemplatePersister implements PersisterInterface
             $this->templateRepository->delete($ids, $context->context);
         }
 
-        /**
-         * only clear cache when we are in an update context
-         * otherwise cache is cleared on template active/deactivate
-         *
-         * @see self::updateActiveState()
-         **/
-        if ($needsCacheClear && !$context->isInstall) {
+        if ($needsCacheClear && $clearCacheAfterChange) {
             $this->cacheClearer->clearHttpCache();
         }
-    }
-
-    public function activate(AppEntity $app, Context $context): void
-    {
-        $this->updateActiveState($app->getId(), $context, false, true);
-    }
-
-    public function deactivate(AppEntity $app, Context $context): void
-    {
-        $this->updateActiveState($app->getId(), $context, true, false);
     }
 
     private function getAppWithExistingTemplates(string $appId, Context $context): AppEntity

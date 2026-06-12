@@ -1,12 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Framework\App\Lifecycle\Persister;
+namespace Shopware\Core\Framework\App\Lifecycle\Handler;
 
 use Shopware\Core\Framework\App\Aggregate\CmsBlock\AppCmsBlockCollection;
-use Shopware\Core\Framework\App\AppEntity;
 use Shopware\Core\Framework\App\Cms\AbstractBlockTemplateLoader;
 use Shopware\Core\Framework\App\Cms\CmsExtensions;
-use Shopware\Core\Framework\App\Lifecycle\AppLifecycleContext;
+use Shopware\Core\Framework\App\Lifecycle\Context\AppPersistContext;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
@@ -17,7 +16,7 @@ use Shopware\Core\Framework\Log\Package;
  * @internal only for use by the app-system
  */
 #[Package('framework')]
-class CmsBlockPersister implements PersisterInterface
+class CmsBlockLifecycleHandler extends AbstractLifecycleHandler
 {
     /**
      * @param EntityRepository<AppCmsBlockCollection> $cmsBlockRepository
@@ -28,7 +27,17 @@ class CmsBlockPersister implements PersisterInterface
     ) {
     }
 
-    public function persist(AppLifecycleContext $context): void
+    public function install(AppPersistContext $context): void
+    {
+        $this->persist($context);
+    }
+
+    public function update(AppPersistContext $context): void
+    {
+        $this->persist($context);
+    }
+
+    private function persist(AppPersistContext $context): void
     {
         if (!$context->appFilesystem->has('Resources/cms.xml')) {
             return;
@@ -60,14 +69,6 @@ class CmsBlockPersister implements PersisterInterface
         }
 
         $this->deleteOldCmsBlocks($existingCmsBlocks, $context->context);
-    }
-
-    public function activate(AppEntity $app, Context $context): void
-    {
-    }
-
-    public function deactivate(AppEntity $app, Context $context): void
-    {
     }
 
     private function deleteOldCmsBlocks(AppCmsBlockCollection $toBeRemoved, Context $context): void

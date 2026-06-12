@@ -1,10 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Framework\App\Lifecycle\Persister;
+namespace Shopware\Core\Framework\App\Lifecycle\Handler;
 
 use Doctrine\DBAL\Connection;
-use Shopware\Core\Framework\App\AppEntity;
-use Shopware\Core\Framework\App\Lifecycle\AppLifecycleContext;
+use Shopware\Core\Framework\App\Lifecycle\Context\AppPersistContext;
 use Shopware\Core\Framework\App\Manifest\Xml\CustomField\CustomFields;
 use Shopware\Core\Framework\App\Manifest\Xml\CustomField\CustomFieldSet;
 use Shopware\Core\Framework\Context;
@@ -21,7 +20,7 @@ use Shopware\Core\System\CustomField\CustomFieldCollection;
  * @phpstan-import-type CustomFieldSetArray from CustomFieldSet
  */
 #[Package('framework')]
-class CustomFieldPersister implements PersisterInterface
+class CustomFieldLifecycleHandler extends AbstractLifecycleHandler
 {
     /**
      * @param EntityRepository<CustomFieldSetCollection> $customFieldSetRepository
@@ -36,19 +35,21 @@ class CustomFieldPersister implements PersisterInterface
     ) {
     }
 
-    public function persist(AppLifecycleContext $context): void
+    public function install(AppPersistContext $context): void
+    {
+        $this->persist($context);
+    }
+
+    public function update(AppPersistContext $context): void
+    {
+        $this->persist($context);
+    }
+
+    private function persist(AppPersistContext $context): void
     {
         $context->context->scope(Context::SYSTEM_SCOPE, function (Context $innerContext) use ($context): void {
             $this->upsertCustomFieldSets($context->manifest->getCustomFields(), $context->app->getId(), $innerContext);
         });
-    }
-
-    public function activate(AppEntity $app, Context $context): void
-    {
-    }
-
-    public function deactivate(AppEntity $app, Context $context): void
-    {
     }
 
     private function upsertCustomFieldSets(?CustomFields $customFields, string $appId, Context $context): void

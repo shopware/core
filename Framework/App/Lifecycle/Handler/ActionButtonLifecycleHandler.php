@@ -1,10 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Framework\App\Lifecycle\Persister;
+namespace Shopware\Core\Framework\App\Lifecycle\Handler;
 
 use Shopware\Core\Framework\App\Aggregate\ActionButton\ActionButtonCollection;
-use Shopware\Core\Framework\App\AppEntity;
-use Shopware\Core\Framework\App\Lifecycle\AppLifecycleContext;
+use Shopware\Core\Framework\App\Lifecycle\Context\AppPersistContext;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
@@ -15,7 +14,7 @@ use Shopware\Core\Framework\Log\Package;
  * @internal only for use by the app-system
  */
 #[Package('framework')]
-class ActionButtonPersister implements PersisterInterface
+class ActionButtonLifecycleHandler extends AbstractLifecycleHandler
 {
     /**
      * @param EntityRepository<ActionButtonCollection> $actionButtonRepository
@@ -24,7 +23,17 @@ class ActionButtonPersister implements PersisterInterface
     {
     }
 
-    public function persist(AppLifecycleContext $context): void
+    public function install(AppPersistContext $context): void
+    {
+        $this->persist($context);
+    }
+
+    public function update(AppPersistContext $context): void
+    {
+        $this->persist($context);
+    }
+
+    private function persist(AppPersistContext $context): void
     {
         $existingActionButtons = $this->getExistingActionButtons($context->app->getId(), $context->context);
 
@@ -48,14 +57,6 @@ class ActionButtonPersister implements PersisterInterface
         }
 
         $this->deleteOldActions($existingActionButtons, $context->context);
-    }
-
-    public function activate(AppEntity $app, Context $context): void
-    {
-    }
-
-    public function deactivate(AppEntity $app, Context $context): void
-    {
     }
 
     private function deleteOldActions(ActionButtonCollection $toBeRemoved, Context $context): void

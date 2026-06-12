@@ -1,11 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Framework\App\Lifecycle\Persister;
+namespace Shopware\Core\Framework\App\Lifecycle\Handler;
 
 use Shopware\Core\Framework\App\Aggregate\AppScriptCondition\AppScriptConditionCollection;
 use Shopware\Core\Framework\App\AppCollection;
 use Shopware\Core\Framework\App\AppEntity;
-use Shopware\Core\Framework\App\Lifecycle\AppLifecycleContext;
+use Shopware\Core\Framework\App\Lifecycle\Context\AppActivationContext;
+use Shopware\Core\Framework\App\Lifecycle\Context\AppPersistContext;
 use Shopware\Core\Framework\App\Lifecycle\ScriptFileReader;
 use Shopware\Core\Framework\App\Manifest\Xml\CustomField\CustomFieldTypes\BoolField;
 use Shopware\Core\Framework\App\Manifest\Xml\CustomField\CustomFieldTypes\CustomFieldType;
@@ -33,7 +34,7 @@ use Symfony\Component\Validator\Constraints\Type;
  * @internal only for use by the app-system
  */
 #[Package('framework')]
-class RuleConditionPersister implements PersisterInterface
+class RuleConditionLifecycleHandler extends AbstractLifecycleHandler
 {
     private const CONDITION_SCRIPT_DIR = '/rule-conditions/';
 
@@ -48,7 +49,43 @@ class RuleConditionPersister implements PersisterInterface
     ) {
     }
 
-    public function persist(AppLifecycleContext $context): void
+    public function install(AppPersistContext $context): void
+    {
+        $this->persist($context);
+    }
+
+    public function update(AppPersistContext $context): void
+    {
+        $this->persist($context);
+    }
+
+    public function activate(AppActivationContext $context): void
+    {
+        $criteria = new Criteria();
+        $criteria->addFilter(new EqualsFilter('appId', $context->app->getId()));
+        $criteria->addFilter(new EqualsFilter('active', false));
+
+        $scripts = $this->appScriptConditionRepository->searchIds($criteria, $context->context)->getIds();
+
+        $updateSet = array_map(static fn (string $id) => ['id' => $id, 'active' => true], $scripts);
+
+        $this->appScriptConditionRepository->update($updateSet, $context->context);
+    }
+
+    public function deactivate(AppActivationContext $context): void
+    {
+        $criteria = new Criteria();
+        $criteria->addFilter(new EqualsFilter('appId', $context->app->getId()));
+        $criteria->addFilter(new EqualsFilter('active', true));
+
+        $scripts = $this->appScriptConditionRepository->searchIds($criteria, $context->context)->getIds();
+
+        $updateSet = array_map(static fn (string $id) => ['id' => $id, 'active' => false], $scripts);
+
+        $this->appScriptConditionRepository->update($updateSet, $context->context);
+    }
+
+    private function persist(AppPersistContext $context): void
     {
         $app = $this->getAppWithExistingConditions($context->app->getId(), $context->context);
         $existingRuleConditions = $app->getScriptConditions();
@@ -87,32 +124,6 @@ class RuleConditionPersister implements PersisterInterface
         }
 
         $this->deleteConditionScripts($existingRuleConditions, $context->context);
-    }
-
-    public function activate(AppEntity $app, Context $context): void
-    {
-        $criteria = new Criteria();
-        $criteria->addFilter(new EqualsFilter('appId', $app->getId()));
-        $criteria->addFilter(new EqualsFilter('active', false));
-
-        $scripts = $this->appScriptConditionRepository->searchIds($criteria, $context)->getIds();
-
-        $updateSet = array_map(static fn (string $id) => ['id' => $id, 'active' => true], $scripts);
-
-        $this->appScriptConditionRepository->update($updateSet, $context);
-    }
-
-    public function deactivate(AppEntity $app, Context $context): void
-    {
-        $criteria = new Criteria();
-        $criteria->addFilter(new EqualsFilter('appId', $app->getId()));
-        $criteria->addFilter(new EqualsFilter('active', true));
-
-        $scripts = $this->appScriptConditionRepository->searchIds($criteria, $context)->getIds();
-
-        $updateSet = array_map(static fn (string $id) => ['id' => $id, 'active' => false], $scripts);
-
-        $this->appScriptConditionRepository->update($updateSet, $context);
     }
 
     private function getAppWithExistingConditions(string $appId, Context $context): AppEntity

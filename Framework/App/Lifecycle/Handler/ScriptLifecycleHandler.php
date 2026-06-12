@@ -1,10 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Framework\App\Lifecycle\Persister;
+namespace Shopware\Core\Framework\App\Lifecycle\Handler;
 
 use Shopware\Core\Framework\App\AppCollection;
 use Shopware\Core\Framework\App\AppEntity;
-use Shopware\Core\Framework\App\Lifecycle\AppLifecycleContext;
+use Shopware\Core\Framework\App\Lifecycle\Context\AppActivationContext;
+use Shopware\Core\Framework\App\Lifecycle\Context\AppPersistContext;
 use Shopware\Core\Framework\App\Lifecycle\ScriptFileReader;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
@@ -17,7 +18,7 @@ use Shopware\Core\Framework\Script\ScriptCollection;
  * @internal only for use by the app-system
  */
 #[Package('framework')]
-class ScriptPersister implements PersisterInterface
+class ScriptLifecycleHandler extends AbstractLifecycleHandler
 {
     /**
      * @param EntityRepository<ScriptCollection> $scriptRepository
@@ -30,37 +31,42 @@ class ScriptPersister implements PersisterInterface
     ) {
     }
 
-    public function persist(AppLifecycleContext $context): void
+    public function install(AppPersistContext $context): void
     {
         $this->updateScripts($context->app->getId(), $context->context);
     }
 
-    public function activate(AppEntity $app, Context $context): void
+    public function update(AppPersistContext $context): void
+    {
+        $this->updateScripts($context->app->getId(), $context->context);
+    }
+
+    public function activate(AppActivationContext $context): void
     {
         $criteria = new Criteria();
         $criteria->setTitle('app-scripts::activate');
-        $criteria->addFilter(new EqualsFilter('appId', $app->getId()));
+        $criteria->addFilter(new EqualsFilter('appId', $context->app->getId()));
         $criteria->addFilter(new EqualsFilter('active', false));
 
-        $scriptIds = $this->scriptRepository->searchIds($criteria, $context)->getIds();
+        $scriptIds = $this->scriptRepository->searchIds($criteria, $context->context)->getIds();
 
         $updateSet = array_map(static fn (string $id) => ['id' => $id, 'active' => true], $scriptIds);
 
-        $this->scriptRepository->update($updateSet, $context);
+        $this->scriptRepository->update($updateSet, $context->context);
     }
 
-    public function deactivate(AppEntity $app, Context $context): void
+    public function deactivate(AppActivationContext $context): void
     {
         $criteria = new Criteria();
         $criteria->setTitle('app-scripts::deactivate');
-        $criteria->addFilter(new EqualsFilter('appId', $app->getId()));
+        $criteria->addFilter(new EqualsFilter('appId', $context->app->getId()));
         $criteria->addFilter(new EqualsFilter('active', true));
 
-        $scriptIds = $this->scriptRepository->searchIds($criteria, $context)->getIds();
+        $scriptIds = $this->scriptRepository->searchIds($criteria, $context->context)->getIds();
 
         $updateSet = array_map(static fn (string $id) => ['id' => $id, 'active' => false], $scriptIds);
 
-        $this->scriptRepository->update($updateSet, $context);
+        $this->scriptRepository->update($updateSet, $context->context);
     }
 
     /**

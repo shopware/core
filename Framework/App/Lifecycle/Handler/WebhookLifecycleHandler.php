@@ -1,34 +1,27 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Framework\App\Lifecycle\Persister;
+namespace Shopware\Core\Framework\App\Lifecycle\Handler;
 
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Psr\Clock\ClockInterface;
 use Shopware\Core\Defaults;
-use Shopware\Core\Framework\App\AppEntity;
 use Shopware\Core\Framework\App\Flow\Action\Action;
-use Shopware\Core\Framework\App\Lifecycle\AppLifecycleContext;
+use Shopware\Core\Framework\App\Lifecycle\Context\AppPersistContext;
 use Shopware\Core\Framework\App\Manifest\Manifest;
 use Shopware\Core\Framework\App\Manifest\Xml\Webhook\Webhook;
-use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Util\Filesystem;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\Framework\Webhook\WebhookCacheClearer;
-use Shopware\Tests\Integration\Core\Framework\App\Lifecycle\WebhookPersisterTest;
 
 /**
- * @codeCoverageIgnore
- *
- * @see WebhookPersisterTest
- *
  * @internal only for use by the app-system
  *
  * @phpstan-type WebhookRecord array{name: string, event_name: string, url: string, only_live_version: int, app_id: string, active: int, error_count: int}
  */
 #[Package('framework')]
-class WebhookPersister implements PersisterInterface
+class WebhookLifecycleHandler extends AbstractLifecycleHandler
 {
     public function __construct(
         private readonly Connection $connection,
@@ -37,7 +30,17 @@ class WebhookPersister implements PersisterInterface
     ) {
     }
 
-    public function persist(AppLifecycleContext $context): void
+    public function install(AppPersistContext $context): void
+    {
+        $this->persist($context);
+    }
+
+    public function update(AppPersistContext $context): void
+    {
+        $this->persist($context);
+    }
+
+    private function persist(AppPersistContext $context): void
     {
         $appId = $context->app->getId();
         $flowActions = $this->getFlowActions($context->appFilesystem);
@@ -71,14 +74,6 @@ class WebhookPersister implements PersisterInterface
 
         $this->deleteOldWebhooks($existingWebhooks);
         $this->cacheClearer->clearWebhookCache();
-    }
-
-    public function activate(AppEntity $app, Context $context): void
-    {
-    }
-
-    public function deactivate(AppEntity $app, Context $context): void
-    {
     }
 
     /**

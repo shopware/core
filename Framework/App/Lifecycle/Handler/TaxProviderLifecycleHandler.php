@@ -1,9 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Framework\App\Lifecycle\Persister;
+namespace Shopware\Core\Framework\App\Lifecycle\Handler;
 
-use Shopware\Core\Framework\App\AppEntity;
-use Shopware\Core\Framework\App\Lifecycle\AppLifecycleContext;
+use Shopware\Core\Framework\App\Lifecycle\Context\AppPersistContext;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
@@ -16,7 +15,7 @@ use Shopware\Core\System\TaxProvider\TaxProviderCollection;
  * @internal only for use by the app-system
  */
 #[Package('checkout')]
-class TaxProviderPersister implements PersisterInterface
+class TaxProviderLifecycleHandler extends AbstractLifecycleHandler
 {
     /**
      * @internal
@@ -27,7 +26,17 @@ class TaxProviderPersister implements PersisterInterface
     {
     }
 
-    public function persist(AppLifecycleContext $context): void
+    public function install(AppPersistContext $context): void
+    {
+        $this->persist($context);
+    }
+
+    public function update(AppPersistContext $context): void
+    {
+        $this->persist($context);
+    }
+
+    private function persist(AppPersistContext $context): void
     {
         if (!$context->hasAppSecret()) {
             return;
@@ -72,14 +81,6 @@ class TaxProviderPersister implements PersisterInterface
         }
 
         $this->taxProviderRepository->upsert($upserts, $context->context);
-    }
-
-    public function activate(AppEntity $app, Context $context): void
-    {
-    }
-
-    public function deactivate(AppEntity $app, Context $context): void
-    {
     }
 
     private function getExistingTaxProviders(string $appId, Context $context): TaxProviderCollection
