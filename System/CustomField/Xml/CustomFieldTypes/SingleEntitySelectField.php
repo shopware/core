@@ -1,29 +1,28 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Framework\App\Manifest\Xml\CustomField\CustomFieldTypes;
+namespace Shopware\Core\System\CustomField\Xml\CustomFieldTypes;
 
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\System\CustomField\CustomFieldTypes;
 
 /**
- * @internal only for use by the app-system
+ * @internal
  */
 #[Package('framework')]
-class SingleSelectField extends CustomFieldType
+class SingleEntitySelectField extends CustomFieldType
 {
     protected const TRANSLATABLE_FIELDS = ['label', 'help-text', 'placeholder'];
 
-    protected const COMPONENT_NAME = 'sw-single-select';
+    protected const COMPONENT_NAME = 'sw-entity-single-select';
 
     /**
      * @var array<string, string>
      */
     protected array $placeholder = [];
 
-    /**
-     * @var array<string, string>
-     */
-    protected array $options;
+    protected string $entity;
+
+    protected ?string $labelProperty = null;
 
     /**
      * @return array<string, string>
@@ -33,34 +32,33 @@ class SingleSelectField extends CustomFieldType
         return $this->placeholder;
     }
 
-    /**
-     * @return array<string, string>
-     */
-    public function getOptions(): array
+    public function getEntity(): string
     {
-        return $this->options;
+        return $this->entity;
+    }
+
+    public function getLabelProperty(): ?string
+    {
+        return $this->labelProperty;
     }
 
     protected function toEntityArray(): array
     {
-        $options = [];
-
-        foreach ($this->options as $key => $names) {
-            $options[] = [
-                'label' => $names,
-                'value' => $key,
-            ];
-        }
-
-        return [
-            'type' => CustomFieldTypes::SELECT,
+        $entityArray = [
+            'type' => CustomFieldTypes::ENTITY,
             'config' => [
+                'entity' => $this->entity,
                 'placeholder' => $this->placeholder,
                 // use $this so child classes can override the const
                 'componentName' => $this::COMPONENT_NAME,
                 'customFieldType' => 'select',
-                'options' => $options,
             ],
         ];
+
+        if ($this->labelProperty !== null) {
+            $entityArray['config']['labelProperty'] = $this->labelProperty;
+        }
+
+        return $entityArray;
     }
 }

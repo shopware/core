@@ -1,15 +1,15 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Framework\App\Manifest\Xml\CustomField\CustomFieldTypes;
+namespace Shopware\Core\System\CustomField\Xml\CustomFieldTypes;
 
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\System\CustomField\CustomFieldTypes;
 
 /**
- * @internal only for use by the app-system
+ * @internal
  */
 #[Package('framework')]
-class IntField extends CustomFieldType
+class FloatField extends CustomFieldType
 {
     protected const TRANSLATABLE_FIELDS = ['label', 'help-text', 'placeholder'];
 
@@ -18,11 +18,11 @@ class IntField extends CustomFieldType
      */
     protected array $placeholder = [];
 
-    protected ?int $steps = null;
+    protected ?float $steps = null;
 
-    protected ?int $min = null;
+    protected ?float $min = null;
 
-    protected ?int $max = null;
+    protected ?float $max = null;
 
     /**
      * @return array<string, string>
@@ -32,17 +32,17 @@ class IntField extends CustomFieldType
         return $this->placeholder;
     }
 
-    public function getSteps(): ?int
+    public function getSteps(): ?float
     {
         return $this->steps;
     }
 
-    public function getMin(): ?int
+    public function getMin(): ?float
     {
         return $this->min;
     }
 
-    public function getMax(): ?int
+    public function getMax(): ?float
     {
         return $this->max;
     }
@@ -50,13 +50,13 @@ class IntField extends CustomFieldType
     protected function toEntityArray(): array
     {
         $entityArray = [
-            'type' => CustomFieldTypes::INT,
+            'type' => CustomFieldTypes::FLOAT,
             'config' => [
                 'type' => 'number',
                 'placeholder' => $this->placeholder,
                 'componentName' => 'sw-field',
                 'customFieldType' => 'number',
-                'numberType' => 'int',
+                'numberType' => 'float',
             ],
         ];
 

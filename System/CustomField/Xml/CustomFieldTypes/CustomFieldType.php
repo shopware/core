@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Shopware\Core\Framework\App\Manifest\Xml\CustomField\CustomFieldTypes;
+namespace Shopware\Core\System\CustomField\Xml\CustomFieldTypes;
 
 use Shopware\Core\Framework\App\Manifest\Xml\XmlElement;
 use Shopware\Core\Framework\App\Manifest\XmlParserUtils;
@@ -8,7 +8,7 @@ use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Util\XmlReader;
 
 /**
- * @internal only for use by the app-system
+ * @internal
  *
  * @phpstan-type CustomFieldTypeArray array{name?: string, type?: string, config: array{label: array<string, string>, helpText: array<string, string>, customFieldPosition: int, validation?: 'required'}, allowCustomerWrite?: true, allowCartExpose?: true}
  */
