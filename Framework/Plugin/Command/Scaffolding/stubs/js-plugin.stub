@@ -7,6 +7,7 @@ export default class ExamplePlugin extends Plugin {
 
     onScroll() {
         if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight) {
+            // eslint-disable-next-line no-alert -- This is just demo code which will not end up in production.
             alert('Seems like there\'s nothing more to see here.');
         }
     }
